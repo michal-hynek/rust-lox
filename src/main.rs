@@ -4,6 +4,7 @@ use clap::Parser;
 use crate::runner::{run_file, run_prompt};
 
 mod runner;
+mod scanner;
 
 /// Rust implementation of Lox interpreter
 #[derive(Parser, Debug)]

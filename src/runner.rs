@@ -2,12 +2,16 @@ use std::{fs::read_to_string, io::{self, Write}};
 
 use anyhow::Result;
 
+use crate::scanner::Scanner;
+
 pub fn run_file(file_path: &str) -> Result<()> {
     let source = read_to_string(file_path)?;
     run(&source)
 }
 
 pub fn run_prompt() -> Result<()> {
+    println!("Lox REPL (press CTRL-D to exit)");
+
     let mut input = String::new();
 
     loop {
@@ -17,6 +21,7 @@ pub fn run_prompt() -> Result<()> {
         match io::stdin().read_line(&mut input) {
             Ok(len) => {
                 if len == 0 {
+                    println!();
                     break;
                 }
             },
@@ -33,5 +38,12 @@ pub fn run_prompt() -> Result<()> {
 }
 
 fn run(source: &str) -> Result<()> {
-    todo!("implement run");
+    let scanner = Scanner::new(source);
+    let tokens = scanner.scan_tokens()?;
+
+    for token in tokens {
+        println!("{:?}", token);
+    }
+
+    Ok(())
 }
