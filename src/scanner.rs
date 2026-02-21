@@ -1,11 +1,7 @@
 use anyhow::Result;
+use derive_more::Display;
 
-#[derive(Debug)]
-pub struct Token {
-    token_type: TokenType,
-}
-
-#[derive(Debug)]
+#[derive(Debug, Display)]
 pub enum TokenType {
     // single character tokens
     LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,
@@ -23,6 +19,26 @@ pub enum TokenType {
     // keywords
     AND, CLASS, ELSE, FALSE, FUN, FOR, IF, NIL, OR,
     PRINT, RETURN, SUPER, THIS, TRUE, VAR, WHILE,
+}
+
+#[derive(Debug, Display)]
+#[display("type: {}, lexeme: {}, literal: {:?}, line: {}", r#type, lexeme, literal, line)]
+pub struct Token {
+    r#type: TokenType,
+    lexeme: String,
+    literal: Option<String>,
+    line: usize,
+}
+
+impl Token {
+    pub fn new(r#type: TokenType, lexeme: &str, literal: Option<&str>, line: usize) -> Self {
+        Self {
+            r#type,
+            lexeme: lexeme.to_string(),
+            literal: literal.map(|literal| literal.to_string()),
+            line,
+        }
+    }
 }
 
 pub struct Scanner {
