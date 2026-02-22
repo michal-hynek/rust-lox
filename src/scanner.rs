@@ -19,6 +19,8 @@ pub enum TokenType {
     // keywords
     AND, CLASS, ELSE, FALSE, FUN, FOR, IF, NIL, OR,
     PRINT, RETURN, SUPER, THIS, TRUE, VAR, WHILE,
+
+    EOF,
 }
 
 #[derive(Debug, Display)]
@@ -30,29 +32,79 @@ pub struct Token {
     line: usize,
 }
 
-impl Token {
-    pub fn new(r#type: TokenType, lexeme: &str, literal: Option<&str>, line: usize) -> Self {
-        Self {
-            r#type,
-            lexeme: lexeme.to_string(),
-            literal: literal.map(|literal| literal.to_string()),
-            line,
-        }
-    }
-}
-
 pub struct Scanner {
     source: String,
+    current: usize,
+    start: usize,
+    line: usize,
 }
 
 impl Scanner {
     pub fn new(source: &str) -> Self {
         Self {
             source: source.to_string(),
+            current: 0,
+            start: 0,
+            line: 1,
         }
     }
 
-    pub fn scan_tokens(&self) -> Result<Vec<Token>> {
-        Ok(vec![])
+    pub fn scan_tokens(&mut self) -> Result<Vec<Token>> {
+        let mut tokens = Vec::new();
+        let mut errors = Vec::new();
+
+        while !self.is_at_end() {
+            self.start = self.current;
+
+            match self.scan_token() {
+                Ok(token) => tokens.push(token),
+                Err(e) => errors.push(e),
+            };
+        }
+
+        if !errors.is_empty() {
+            let error_messages = errors.iter()
+                .map(|e| e.to_string())
+                .collect::<Vec<String>>()
+                .join("\n");
+
+            return Err(anyhow::anyhow!("syntax errors:\n{}", error_messages));
+        }
+
+        tokens.push(Token { r#type: TokenType::EOF, lexeme: "".to_string(), literal: None, line: self.line });
+
+        Ok(tokens)
+    }
+
+    fn scan_token(&mut self) -> Result<Token> {
+        let c = self.advance();
+
+        let token = match c {
+            // single character tokens
+            '(' => Token { r#type: TokenType::LEFT_PAREN, lexeme: c.to_string(), literal: None, line: self.line },
+            ')' => Token { r#type: TokenType::RIGHT_PAREN, lexeme: c.to_string(), literal: None, line: self.line },
+            '{' => Token { r#type: TokenType::LEFT_BRACE, lexeme: c.to_string(), literal: None, line: self.line },
+            '}' => Token { r#type: TokenType::RIGHT_BRACE, lexeme: c.to_string(), literal: None, line: self.line },
+            ',' => Token { r#type: TokenType::COMMA, lexeme: c.to_string(), literal: None, line: self.line },
+            '.' => Token { r#type: TokenType::DOT, lexeme: c.to_string(), literal: None, line: self.line },
+            '-' => Token { r#type: TokenType::MINUS, lexeme: c.to_string(), literal: None, line: self.line },
+            '+' => Token { r#type: TokenType::PLUS, lexeme: c.to_string(), literal: None, line: self.line },
+            ';' => Token { r#type: TokenType::SEMICOLON, lexeme: c.to_string(), literal: None, line: self.line },
+            '*' => Token { r#type: TokenType::STAR, lexeme: c.to_string(), literal: None, line: self.line },
+            _ => return Err(anyhow::anyhow!("Unexpected character: {c} on line {}", self.line)),
+        };
+
+        Ok(token)
+    }
+
+    fn advance(&mut self) -> char {
+        let c = self.source.as_bytes()[self.current];
+        self.current += 1;
+
+        c as char
+    }
+
+    fn is_at_end(&self) -> bool {
+        self.current >= self.source.len()
     }
 }
