@@ -91,6 +91,45 @@ impl Scanner {
             '+' => Token { r#type: TokenType::PLUS, lexeme: c.to_string(), literal: None, line: self.line },
             ';' => Token { r#type: TokenType::SEMICOLON, lexeme: c.to_string(), literal: None, line: self.line },
             '*' => Token { r#type: TokenType::STAR, lexeme: c.to_string(), literal: None, line: self.line },
+
+            // operators
+            '!' => {
+                let token_type = if self.match_next('=') {
+                    TokenType::BANG_EQUAL
+                } else {
+                    TokenType::BANG
+                };
+
+                Token { r#type: token_type, lexeme: c.to_string(), literal: None, line: self.line }
+            }
+            '=' => {
+                let token_type = if self.match_next('=') {
+                    TokenType::EQUAL_EQUAL
+                } else {
+                    TokenType::EQUAL
+                };
+
+                Token { r#type: token_type, lexeme: c.to_string(), literal: None, line: self.line }
+            },
+            '<' => {
+                let token_type = if self.match_next('=') {
+                    TokenType::LESS_EQUAL
+                } else {
+                    TokenType::LESS
+                };
+
+                Token { r#type: token_type, lexeme: c.to_string(), literal: None, line: self.line }
+            },
+            '>' => {
+                let token_type = if self.match_next('=') {
+                    TokenType::GREATER_EQUAL
+                } else {
+                    TokenType::GREATER
+                };
+
+                Token { r#type: token_type, lexeme: c.to_string(), literal: None, line: self.line }
+            },
+
             _ => return Err(anyhow::anyhow!("Unexpected character: {c} on line {}", self.line)),
         };
 
@@ -102,6 +141,20 @@ impl Scanner {
         self.current += 1;
 
         c as char
+    }
+
+    fn match_next(&mut self, expected: char) -> bool {
+        if self.is_at_end() {
+            return false;
+        }
+
+        if self.source.as_bytes()[self.current+1] as char != expected {
+            return false;
+        }
+
+        self.current += 1;
+
+        true
     }
 
     fn is_at_end(&self) -> bool {
