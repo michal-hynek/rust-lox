@@ -57,7 +57,11 @@ impl Scanner {
             self.start = self.current;
 
             match self.scan_token() {
-                Ok(token) => tokens.push(token),
+                Ok(token) => {
+                    if let Some(token) = token {
+                        tokens.push(token);
+                    }
+                },
                 Err(e) => errors.push(e),
             };
         }
@@ -76,7 +80,7 @@ impl Scanner {
         Ok(tokens)
     }
 
-    fn scan_token(&mut self) -> Result<Token> {
+    fn scan_token(&mut self) -> Result<Option<Token>> {
         let c = self.advance();
 
         let token = match c {
@@ -130,10 +134,23 @@ impl Scanner {
                 Token { r#type: token_type, lexeme: c.to_string(), literal: None, line: self.line }
             },
 
+            // comments
+            '/' => {
+                if self.match_next('/') {
+                    while self.peek() != '\n' && !self.is_at_end() {
+                        self.advance();
+                    }
+
+                    return Ok(None);
+                } else {
+                    Token { r#type: TokenType::SLASH, lexeme: c.to_string(), literal: None, line: self.line }
+                }
+            },
+
             _ => return Err(anyhow::anyhow!("Unexpected character: {c} on line {}", self.line)),
         };
 
-        Ok(token)
+        Ok(Some(token))
     }
 
     fn advance(&mut self) -> char {
@@ -155,6 +172,14 @@ impl Scanner {
         self.current += 1;
 
         true
+    }
+
+    fn peek(&self) -> char {
+        if self.is_at_end() {
+            '\0'
+        } else {
+            self.source.as_bytes()[self.current+1] as char
+        }
     }
 
     fn is_at_end(&self) -> bool {
