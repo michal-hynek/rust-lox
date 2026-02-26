@@ -147,6 +147,15 @@ impl Scanner {
                 }
             },
 
+            // whitespace
+            ' ' | '\r' | '\t' => {
+                return Ok(None);
+            }
+            '\n' => {
+                self.line += 1;
+                return Ok(None);
+            }
+
             _ => return Err(anyhow::anyhow!("Unexpected character: {c} on line {}", self.line)),
         };
 
