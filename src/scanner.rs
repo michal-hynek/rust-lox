@@ -156,6 +156,11 @@ impl Scanner {
                 return Ok(None);
             }
 
+            // string literals
+            '"' => {
+                self.string()?
+            },
+
             _ => return Err(anyhow::anyhow!("Unexpected character: {c} on line {}", self.line)),
         };
 
@@ -189,6 +194,31 @@ impl Scanner {
         } else {
             self.source.as_bytes()[self.current+1] as char
         }
+    }
+
+    fn string(&mut self) -> Result<Token> {
+        let line = self.line;
+
+        while self.peek() != '"' && !self.is_at_end() {
+            if self.peek() == '\n' {
+                self.line += 1;
+            }
+
+            self.advance();
+        }
+
+        if self.is_at_end() {
+            return Err(anyhow::anyhow!("Unterminated string."));
+        }
+
+        // closing "
+        self.advance();
+
+        let value = String::from_utf8(self.source.as_bytes()[self.start+1..self.current-1].to_vec())?;
+        let lexeme = String::from_utf8(self.source.as_bytes()[self.start..self.current].to_vec())?;
+        let token = Token { r#type: TokenType::STRING, lexeme, literal: Some(value), line };
+
+        Ok(token)
     }
 
     fn is_at_end(&self) -> bool {
