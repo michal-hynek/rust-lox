@@ -161,7 +161,13 @@ impl Scanner {
                 self.string()?
             },
 
-            _ => return Err(anyhow::anyhow!("Unexpected character: {c} on line {}", self.line)),
+            c => {
+                if c.is_ascii_digit() {
+                    self.number()?
+                } else {
+                    return Err(anyhow::anyhow!("Unexpected character: {c} on line {}", self.line));
+                }
+            },
         };
 
         Ok(Some(token))
@@ -196,6 +202,14 @@ impl Scanner {
         }
     }
 
+    fn peek_next(&self) -> char {
+        if self.current + 1 >= self.source.len() {
+            '\0'
+        } else {
+            self.source.as_bytes()[self.current+1] as char
+        }
+    }
+
     fn string(&mut self) -> Result<Token> {
         let line = self.line;
 
@@ -220,6 +234,26 @@ impl Scanner {
 
         Ok(token)
     }
+
+    fn number(&mut self) -> Result<Token> {
+        while self.peek().is_ascii_digit() {
+            self.advance();
+        }
+
+        if self.peek() == '.' && self.peek_next().is_ascii_digit() {
+            self.advance();
+        }
+
+        while self.peek().is_ascii_digit() {
+            self.advance();
+        }
+
+        let value = String::from_utf8(self.source.as_bytes()[self.start..self.current].to_vec())?;
+        let token = Token { r#type: TokenType::STRING, lexeme: value.clone(), literal: Some(value), line: self.line };
+
+        Ok(token)
+    }
+
 
     fn is_at_end(&self) -> bool {
         self.current >= self.source.len()
