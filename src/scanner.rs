@@ -1,6 +1,10 @@
 use anyhow::Result;
 use derive_more::Display;
 
+fn is_alpha(c: char) -> bool {
+    ('a'..='z').contains(&c) || ('A'..='Z').contains(&c) || c == '_'
+}
+
 #[derive(Debug, Display)]
 pub enum TokenType {
     // single character tokens
@@ -164,6 +168,8 @@ impl Scanner {
             c => {
                 if c.is_ascii_digit() {
                     self.number()?
+                } else if is_alpha(c) {
+                    self.identifier()?
                 } else {
                     return Err(anyhow::anyhow!("Unexpected character: {c} on line {}", self.line));
                 }
@@ -254,6 +260,16 @@ impl Scanner {
         Ok(token)
     }
 
+    fn identifier(&mut self) -> Result<Token> {
+        while is_alpha(self.peek()) || self.peek().is_ascii_digit() {
+            self.advance();
+        }
+
+        let value = String::from_utf8(self.source.as_bytes()[self.start..self.current].to_vec())?;
+        let token = Token { r#type: TokenType::IDENTIFIER, lexeme: value.clone(), literal: Some(value), line: self.line };
+
+        Ok(token)
+    }
 
     fn is_at_end(&self) -> bool {
         self.current >= self.source.len()
