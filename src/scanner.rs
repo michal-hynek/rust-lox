@@ -1,11 +1,32 @@
+use std::{collections::HashMap, sync::LazyLock};
+
 use anyhow::Result;
 use derive_more::Display;
 
+static KEYWORDS: LazyLock<HashMap<String, TokenType>> = LazyLock::new(|| HashMap::from([
+    ("and".to_string(), TokenType::AND),
+    ("class".to_string(), TokenType::CLASS),
+    ("else".to_string(), TokenType::ELSE),
+    ("false".to_string(), TokenType::FALSE),
+    ("for".to_string(), TokenType::FOR),
+    ("fun".to_string(), TokenType::FUN),
+    ("if".to_string(), TokenType::IF),
+    ("nil".to_string(), TokenType::NIL),
+    ("or".to_string(), TokenType::OR),
+    ("print".to_string(), TokenType::PRINT),
+    ("return".to_string(), TokenType::RETURN),
+    ("super".to_string(), TokenType::SUPER),
+    ("this".to_string(), TokenType::THIS),
+    ("true".to_string(), TokenType::TRUE),
+    ("var".to_string(), TokenType::VAR),
+    ("while".to_string(), TokenType::WHILE),
+]));
+
 fn is_alpha(c: char) -> bool {
-    ('a'..='z').contains(&c) || ('A'..='Z').contains(&c) || c == '_'
+    c.is_ascii_lowercase() || c.is_ascii_uppercase() || c == '_'
 }
 
-#[derive(Debug, Display)]
+#[derive(Debug, Display, Clone, Copy)]
 pub enum TokenType {
     // single character tokens
     LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,
@@ -255,7 +276,7 @@ impl Scanner {
         }
 
         let value = String::from_utf8(self.source.as_bytes()[self.start..self.current].to_vec())?;
-        let token = Token { r#type: TokenType::STRING, lexeme: value.clone(), literal: Some(value), line: self.line };
+        let token = Token { r#type: TokenType::NUMBER, lexeme: value.clone(), literal: Some(value), line: self.line };
 
         Ok(token)
     }
@@ -266,7 +287,13 @@ impl Scanner {
         }
 
         let value = String::from_utf8(self.source.as_bytes()[self.start..self.current].to_vec())?;
-        let token = Token { r#type: TokenType::IDENTIFIER, lexeme: value.clone(), literal: Some(value), line: self.line };
+        let token_type = if let Some(token_type) = KEYWORDS.get(&value) {
+            *token_type
+        } else {
+            TokenType::IDENTIFIER
+        };
+
+        let token = Token { r#type: token_type, lexeme: value.clone(), literal: Some(value), line: self.line };
 
         Ok(token)
     }
