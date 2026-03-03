@@ -4,22 +4,22 @@ use anyhow::Result;
 use derive_more::Display;
 
 static KEYWORDS: LazyLock<HashMap<String, TokenType>> = LazyLock::new(|| HashMap::from([
-    ("and".to_string(), TokenType::AND),
-    ("class".to_string(), TokenType::CLASS),
-    ("else".to_string(), TokenType::ELSE),
-    ("false".to_string(), TokenType::FALSE),
-    ("for".to_string(), TokenType::FOR),
-    ("fun".to_string(), TokenType::FUN),
-    ("if".to_string(), TokenType::IF),
-    ("nil".to_string(), TokenType::NIL),
-    ("or".to_string(), TokenType::OR),
-    ("print".to_string(), TokenType::PRINT),
-    ("return".to_string(), TokenType::RETURN),
-    ("super".to_string(), TokenType::SUPER),
-    ("this".to_string(), TokenType::THIS),
-    ("true".to_string(), TokenType::TRUE),
-    ("var".to_string(), TokenType::VAR),
-    ("while".to_string(), TokenType::WHILE),
+    ("and".to_string(), TokenType::And),
+    ("class".to_string(), TokenType::Class),
+    ("else".to_string(), TokenType::Else),
+    ("false".to_string(), TokenType::False),
+    ("for".to_string(), TokenType::For),
+    ("fun".to_string(), TokenType::Fun),
+    ("if".to_string(), TokenType::If),
+    ("nil".to_string(), TokenType::Nil),
+    ("or".to_string(), TokenType::Or),
+    ("print".to_string(), TokenType::Print),
+    ("return".to_string(), TokenType::Return),
+    ("super".to_string(), TokenType::Super),
+    ("this".to_string(), TokenType::This),
+    ("true".to_string(), TokenType::True),
+    ("var".to_string(), TokenType::Var),
+    ("while".to_string(), TokenType::While),
 ]));
 
 fn is_alpha(c: char) -> bool {
@@ -29,23 +29,23 @@ fn is_alpha(c: char) -> bool {
 #[derive(Debug, Display, Clone, Copy)]
 pub enum TokenType {
     // single character tokens
-    LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,
-    COMMA, DOT, MINUS, PLUS, SEMICOLON, SLASH, STAR,
+    LeftParen, RightParen, LeftBrace, RightBrace,
+    Comma, Dot, Minus, Plus, Semicolon, Slash, Star,
 
     // one or two character tokens
-    BANG, BANG_EQUAL,
-    EQUAL, EQUAL_EQUAL,
-    GREATER, GREATER_EQUAL,
-    LESS, LESS_EQUAL,
+    Bang, BangEqual,
+    Equal, EqualEqual,
+    Greater, GreaterEqual,
+    Less, LessEqual,
 
     // literals
-    IDENTIFIER, STRING, NUMBER,
+    Identifier, String, Number,
 
     // keywords
-    AND, CLASS, ELSE, FALSE, FUN, FOR, IF, NIL, OR,
-    PRINT, RETURN, SUPER, THIS, TRUE, VAR, WHILE,
+    And, Class, Else, False, Fun, For, If, Nil, Or,
+    Print, Return, Super, This, True, Var, While,
 
-    EOF,
+    Eof,
 }
 
 #[derive(Debug, Display)]
@@ -100,7 +100,7 @@ impl Scanner {
             return Err(anyhow::anyhow!("syntax errors:\n{}", error_messages));
         }
 
-        tokens.push(Token { r#type: TokenType::EOF, lexeme: "".to_string(), literal: None, line: self.line });
+        tokens.push(Token { r#type: TokenType::Eof, lexeme: "".to_string(), literal: None, line: self.line });
 
         Ok(tokens)
     }
@@ -110,50 +110,50 @@ impl Scanner {
 
         let token = match c {
             // single character tokens
-            '(' => Token { r#type: TokenType::LEFT_PAREN, lexeme: c.to_string(), literal: None, line: self.line },
-            ')' => Token { r#type: TokenType::RIGHT_PAREN, lexeme: c.to_string(), literal: None, line: self.line },
-            '{' => Token { r#type: TokenType::LEFT_BRACE, lexeme: c.to_string(), literal: None, line: self.line },
-            '}' => Token { r#type: TokenType::RIGHT_BRACE, lexeme: c.to_string(), literal: None, line: self.line },
-            ',' => Token { r#type: TokenType::COMMA, lexeme: c.to_string(), literal: None, line: self.line },
-            '.' => Token { r#type: TokenType::DOT, lexeme: c.to_string(), literal: None, line: self.line },
-            '-' => Token { r#type: TokenType::MINUS, lexeme: c.to_string(), literal: None, line: self.line },
-            '+' => Token { r#type: TokenType::PLUS, lexeme: c.to_string(), literal: None, line: self.line },
-            ';' => Token { r#type: TokenType::SEMICOLON, lexeme: c.to_string(), literal: None, line: self.line },
-            '*' => Token { r#type: TokenType::STAR, lexeme: c.to_string(), literal: None, line: self.line },
+            '(' => Token { r#type: TokenType::LeftParen, lexeme: c.to_string(), literal: None, line: self.line },
+            ')' => Token { r#type: TokenType::RightParen, lexeme: c.to_string(), literal: None, line: self.line },
+            '{' => Token { r#type: TokenType::LeftBrace, lexeme: c.to_string(), literal: None, line: self.line },
+            '}' => Token { r#type: TokenType::RightBrace, lexeme: c.to_string(), literal: None, line: self.line },
+            ',' => Token { r#type: TokenType::Comma, lexeme: c.to_string(), literal: None, line: self.line },
+            '.' => Token { r#type: TokenType::Dot, lexeme: c.to_string(), literal: None, line: self.line },
+            '-' => Token { r#type: TokenType::Minus, lexeme: c.to_string(), literal: None, line: self.line },
+            '+' => Token { r#type: TokenType::Plus, lexeme: c.to_string(), literal: None, line: self.line },
+            ';' => Token { r#type: TokenType::Semicolon, lexeme: c.to_string(), literal: None, line: self.line },
+            '*' => Token { r#type: TokenType::Star, lexeme: c.to_string(), literal: None, line: self.line },
 
             // operators
             '!' => {
                 let token_type = if self.match_next('=') {
-                    TokenType::BANG_EQUAL
+                    TokenType::BangEqual
                 } else {
-                    TokenType::BANG
+                    TokenType::Bang
                 };
 
                 Token { r#type: token_type, lexeme: c.to_string(), literal: None, line: self.line }
             }
             '=' => {
                 let token_type = if self.match_next('=') {
-                    TokenType::EQUAL_EQUAL
+                    TokenType::EqualEqual
                 } else {
-                    TokenType::EQUAL
+                    TokenType::Equal
                 };
 
                 Token { r#type: token_type, lexeme: c.to_string(), literal: None, line: self.line }
             },
             '<' => {
                 let token_type = if self.match_next('=') {
-                    TokenType::LESS_EQUAL
+                    TokenType::LessEqual
                 } else {
-                    TokenType::LESS
+                    TokenType::Less
                 };
 
                 Token { r#type: token_type, lexeme: c.to_string(), literal: None, line: self.line }
             },
             '>' => {
                 let token_type = if self.match_next('=') {
-                    TokenType::GREATER_EQUAL
+                    TokenType::GreaterEqual
                 } else {
-                    TokenType::GREATER
+                    TokenType::Greater
                 };
 
                 Token { r#type: token_type, lexeme: c.to_string(), literal: None, line: self.line }
@@ -168,7 +168,7 @@ impl Scanner {
 
                     return Ok(None);
                 } else {
-                    Token { r#type: TokenType::SLASH, lexeme: c.to_string(), literal: None, line: self.line }
+                    Token { r#type: TokenType::Slash, lexeme: c.to_string(), literal: None, line: self.line }
                 }
             },
 
@@ -257,7 +257,7 @@ impl Scanner {
 
         let value = String::from_utf8(self.source.as_bytes()[self.start+1..self.current-1].to_vec())?;
         let lexeme = String::from_utf8(self.source.as_bytes()[self.start..self.current].to_vec())?;
-        let token = Token { r#type: TokenType::STRING, lexeme, literal: Some(value), line };
+        let token = Token { r#type: TokenType::String, lexeme, literal: Some(value), line };
 
         Ok(token)
     }
@@ -276,7 +276,7 @@ impl Scanner {
         }
 
         let value = String::from_utf8(self.source.as_bytes()[self.start..self.current].to_vec())?;
-        let token = Token { r#type: TokenType::NUMBER, lexeme: value.clone(), literal: Some(value), line: self.line };
+        let token = Token { r#type: TokenType::Number, lexeme: value.clone(), literal: Some(value), line: self.line };
 
         Ok(token)
     }
@@ -290,7 +290,7 @@ impl Scanner {
         let token_type = if let Some(token_type) = KEYWORDS.get(&value) {
             *token_type
         } else {
-            TokenType::IDENTIFIER
+            TokenType::Identifier
         };
 
         let token = Token { r#type: token_type, lexeme: value.clone(), literal: Some(value), line: self.line };
