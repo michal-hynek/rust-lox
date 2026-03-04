@@ -26,7 +26,7 @@ fn is_alpha(c: char) -> bool {
     c.is_ascii_lowercase() || c.is_ascii_uppercase() || c == '_'
 }
 
-#[derive(Debug, Display, Clone, Copy)]
+#[derive(Debug, Display, Clone, Copy, PartialEq)]
 pub enum TokenType {
     // single character tokens
     LeftParen, RightParen, LeftBrace, RightBrace,
@@ -212,7 +212,7 @@ impl Scanner {
             return false;
         }
 
-        if self.source.as_bytes()[self.current+1] as char != expected {
+        if self.source.as_bytes()[self.current] as char != expected {
             return false;
         }
 
@@ -225,7 +225,7 @@ impl Scanner {
         if self.is_at_end() {
             '\0'
         } else {
-            self.source.as_bytes()[self.current+1] as char
+            self.source.as_bytes()[self.current] as char
         }
     }
 
@@ -300,5 +300,122 @@ impl Scanner {
 
     fn is_at_end(&self) -> bool {
         self.current >= self.source.len()
+    }
+}
+
+#[cfg(test)]
+mod test_scanner {
+    use super::*;
+
+    #[test]
+    fn test_scan_tokens_recognizes_single_lexemes() -> Result<()> {
+        let mut scanner = Scanner::new("() {} , . - + ; *");
+        let tokens = scanner.scan_tokens()?;
+
+        assert_eq!(11, tokens.len());
+        assert_eq!(TokenType::LeftParen, tokens[0].r#type);
+        assert_eq!(TokenType::RightParen, tokens[1].r#type);
+        assert_eq!(TokenType::LeftBrace, tokens[2].r#type);
+        assert_eq!(TokenType::RightBrace, tokens[3].r#type);
+        assert_eq!(TokenType::Comma, tokens[4].r#type);
+        assert_eq!(TokenType::Dot, tokens[5].r#type);
+        assert_eq!(TokenType::Minus, tokens[6].r#type);
+        assert_eq!(TokenType::Plus, tokens[7].r#type);
+        assert_eq!(TokenType::Semicolon, tokens[8].r#type);
+        assert_eq!(TokenType::Star, tokens[9].r#type);
+        assert_eq!(TokenType::Eof, tokens[10].r#type);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_scan_tokens_recognizes_comparions() -> Result<()> {
+        let mut scanner = Scanner::new("! != = == > >= < <=");
+        let tokens = scanner.scan_tokens()?;
+
+        assert_eq!(9, tokens.len());
+        assert_eq!(TokenType::Bang, tokens[0].r#type);
+        assert_eq!(TokenType::BangEqual, tokens[1].r#type);
+        assert_eq!(TokenType::Equal, tokens[2].r#type);
+        assert_eq!(TokenType::EqualEqual, tokens[3].r#type);
+        assert_eq!(TokenType::Greater, tokens[4].r#type);
+        assert_eq!(TokenType::GreaterEqual, tokens[5].r#type);
+        assert_eq!(TokenType::Less, tokens[6].r#type);
+        assert_eq!(TokenType::LessEqual, tokens[7].r#type);
+        assert_eq!(TokenType::Eof, tokens[8].r#type);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_scan_tokens_recognizes_literals() -> Result<()> {
+        let mut scanner = Scanner::new("foo \"bar\" 123.45");
+        let tokens = scanner.scan_tokens()?;
+
+        assert_eq!(4, tokens.len());
+        assert_eq!(TokenType::Identifier, tokens[0].r#type);
+        assert_eq!("foo", tokens[0].literal.as_ref().unwrap());
+        assert_eq!(TokenType::String, tokens[1].r#type);
+        assert_eq!("bar", tokens[1].literal.as_ref().unwrap());
+        assert_eq!(TokenType::Number, tokens[2].r#type);
+        assert_eq!("123.45", tokens[2].literal.as_ref().unwrap());
+        assert_eq!(TokenType::Eof, tokens[3].r#type);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_scan_tokens_recognizes_tokens() -> Result<()> {
+        let mut scanner = Scanner::new("and class else false fun for if nil or print return super this true var while");
+        let tokens = scanner.scan_tokens()?;
+
+        assert_eq!(17, tokens.len());
+        assert_eq!(TokenType::And, tokens[0].r#type);
+        assert_eq!("and", tokens[0].literal.as_ref().unwrap());
+        assert_eq!(TokenType::Class, tokens[1].r#type);
+        assert_eq!("class", tokens[1].literal.as_ref().unwrap());
+        assert_eq!(TokenType::Else, tokens[2].r#type);
+        assert_eq!("else", tokens[2].literal.as_ref().unwrap());
+        assert_eq!(TokenType::False, tokens[3].r#type);
+        assert_eq!("false", tokens[3].literal.as_ref().unwrap());
+        assert_eq!(TokenType::Fun, tokens[4].r#type);
+        assert_eq!("fun", tokens[4].literal.as_ref().unwrap());
+        assert_eq!(TokenType::For, tokens[5].r#type);
+        assert_eq!("for", tokens[5].literal.as_ref().unwrap());
+        assert_eq!(TokenType::If, tokens[6].r#type);
+        assert_eq!("if", tokens[6].literal.as_ref().unwrap());
+        assert_eq!(TokenType::Nil, tokens[7].r#type);
+        assert_eq!("nil", tokens[7].literal.as_ref().unwrap());
+        assert_eq!(TokenType::Or, tokens[8].r#type);
+        assert_eq!("or", tokens[8].literal.as_ref().unwrap());
+        assert_eq!(TokenType::Print, tokens[9].r#type);
+        assert_eq!("print", tokens[9].literal.as_ref().unwrap());
+        assert_eq!(TokenType::Return, tokens[10].r#type);
+        assert_eq!("return", tokens[10].literal.as_ref().unwrap());
+        assert_eq!(TokenType::Super, tokens[11].r#type);
+        assert_eq!("super", tokens[11].literal.as_ref().unwrap());
+        assert_eq!(TokenType::This, tokens[12].r#type);
+        assert_eq!("this", tokens[12].literal.as_ref().unwrap());
+        assert_eq!(TokenType::True, tokens[13].r#type);
+        assert_eq!("true", tokens[13].literal.as_ref().unwrap());
+        assert_eq!(TokenType::Var, tokens[14].r#type);
+        assert_eq!("var", tokens[14].literal.as_ref().unwrap());
+        assert_eq!(TokenType::While, tokens[15].r#type);
+        assert_eq!("while", tokens[15].literal.as_ref().unwrap());
+        assert_eq!(TokenType::Eof, tokens[16].r#type);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_scan_tokens_ignores_comments() -> Result<()> {
+        let mut scanner = Scanner::new("// hello world \n for");
+        let tokens = scanner.scan_tokens()?;
+
+        assert_eq!(2, tokens.len());
+        assert_eq!(TokenType::For, tokens[0].r#type);
+        assert_eq!(TokenType::Eof, tokens[1].r#type);
+
+        Ok(())
     }
 }
