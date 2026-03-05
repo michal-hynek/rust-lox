@@ -53,8 +53,14 @@ pub enum TokenType {
 pub struct Token {
     r#type: TokenType,
     lexeme: String,
-    literal: Option<String>,
+    literal: Option<LiteralValue>,
     line: usize,
+}
+
+#[derive(Debug, Display, PartialEq)]
+pub enum LiteralValue {
+    Number(f64),
+    String(String),
 }
 
 pub struct Scanner {
@@ -257,7 +263,7 @@ impl Scanner {
 
         let value = String::from_utf8(self.source.as_bytes()[self.start+1..self.current-1].to_vec())?;
         let lexeme = String::from_utf8(self.source.as_bytes()[self.start..self.current].to_vec())?;
-        let token = Token { r#type: TokenType::String, lexeme, literal: Some(value), line };
+        let token = Token { r#type: TokenType::String, lexeme, literal: Some(LiteralValue::String(value)), line };
 
         Ok(token)
     }
@@ -276,7 +282,8 @@ impl Scanner {
         }
 
         let value = String::from_utf8(self.source.as_bytes()[self.start..self.current].to_vec())?;
-        let token = Token { r#type: TokenType::Number, lexeme: value.clone(), literal: Some(value), line: self.line };
+        let num = value.parse().map_err(|_| anyhow::anyhow!(format!("line {}: '{}' is not a valid number", self.line, value)))?;
+        let token = Token { r#type: TokenType::Number, lexeme: value.clone(), literal: Some(LiteralValue::Number(num)), line: self.line };
 
         Ok(token)
     }
@@ -293,7 +300,7 @@ impl Scanner {
             TokenType::Identifier
         };
 
-        let token = Token { r#type: token_type, lexeme: value.clone(), literal: Some(value), line: self.line };
+        let token = Token { r#type: token_type, lexeme: value.clone(), literal: Some(LiteralValue::String(value)), line: self.line };
 
         Ok(token)
     }
@@ -354,11 +361,11 @@ mod test_scanner {
 
         assert_eq!(4, tokens.len());
         assert_eq!(TokenType::Identifier, tokens[0].r#type);
-        assert_eq!("foo", tokens[0].literal.as_ref().unwrap());
+        assert_eq!(LiteralValue::String("foo".to_string()), *tokens[0].literal.as_ref().unwrap());
         assert_eq!(TokenType::String, tokens[1].r#type);
-        assert_eq!("bar", tokens[1].literal.as_ref().unwrap());
+        assert_eq!(LiteralValue::String("bar".to_string()), *tokens[1].literal.as_ref().unwrap());
         assert_eq!(TokenType::Number, tokens[2].r#type);
-        assert_eq!("123.45", tokens[2].literal.as_ref().unwrap());
+        assert_eq!(LiteralValue::Number(123.45), *tokens[2].literal.as_ref().unwrap());
         assert_eq!(TokenType::Eof, tokens[3].r#type);
 
         Ok(())
@@ -371,37 +378,37 @@ mod test_scanner {
 
         assert_eq!(17, tokens.len());
         assert_eq!(TokenType::And, tokens[0].r#type);
-        assert_eq!("and", tokens[0].literal.as_ref().unwrap());
+        assert_eq!(LiteralValue::String("and".to_string()), *tokens[0].literal.as_ref().unwrap());
         assert_eq!(TokenType::Class, tokens[1].r#type);
-        assert_eq!("class", tokens[1].literal.as_ref().unwrap());
+        assert_eq!(LiteralValue::String("class".to_string()), *tokens[1].literal.as_ref().unwrap());
         assert_eq!(TokenType::Else, tokens[2].r#type);
-        assert_eq!("else", tokens[2].literal.as_ref().unwrap());
+        assert_eq!(LiteralValue::String("else".to_string()), *tokens[2].literal.as_ref().unwrap());
         assert_eq!(TokenType::False, tokens[3].r#type);
-        assert_eq!("false", tokens[3].literal.as_ref().unwrap());
+        assert_eq!(LiteralValue::String("false".to_string()), *tokens[3].literal.as_ref().unwrap());
         assert_eq!(TokenType::Fun, tokens[4].r#type);
-        assert_eq!("fun", tokens[4].literal.as_ref().unwrap());
+        assert_eq!(LiteralValue::String("fun".to_string()), *tokens[4].literal.as_ref().unwrap());
         assert_eq!(TokenType::For, tokens[5].r#type);
-        assert_eq!("for", tokens[5].literal.as_ref().unwrap());
+        assert_eq!(LiteralValue::String("for".to_string()), *tokens[5].literal.as_ref().unwrap());
         assert_eq!(TokenType::If, tokens[6].r#type);
-        assert_eq!("if", tokens[6].literal.as_ref().unwrap());
+        assert_eq!(LiteralValue::String("if".to_string()), *tokens[6].literal.as_ref().unwrap());
         assert_eq!(TokenType::Nil, tokens[7].r#type);
-        assert_eq!("nil", tokens[7].literal.as_ref().unwrap());
+        assert_eq!(LiteralValue::String("nil".to_string()), *tokens[7].literal.as_ref().unwrap());
         assert_eq!(TokenType::Or, tokens[8].r#type);
-        assert_eq!("or", tokens[8].literal.as_ref().unwrap());
+        assert_eq!(LiteralValue::String("or".to_string()), *tokens[8].literal.as_ref().unwrap());
         assert_eq!(TokenType::Print, tokens[9].r#type);
-        assert_eq!("print", tokens[9].literal.as_ref().unwrap());
+        assert_eq!(LiteralValue::String("print".to_string()), *tokens[9].literal.as_ref().unwrap());
         assert_eq!(TokenType::Return, tokens[10].r#type);
-        assert_eq!("return", tokens[10].literal.as_ref().unwrap());
+        assert_eq!(LiteralValue::String("return".to_string()), *tokens[10].literal.as_ref().unwrap());
         assert_eq!(TokenType::Super, tokens[11].r#type);
-        assert_eq!("super", tokens[11].literal.as_ref().unwrap());
+        assert_eq!(LiteralValue::String("super".to_string()), *tokens[11].literal.as_ref().unwrap());
         assert_eq!(TokenType::This, tokens[12].r#type);
-        assert_eq!("this", tokens[12].literal.as_ref().unwrap());
+        assert_eq!(LiteralValue::String("this".to_string()), *tokens[12].literal.as_ref().unwrap());
         assert_eq!(TokenType::True, tokens[13].r#type);
-        assert_eq!("true", tokens[13].literal.as_ref().unwrap());
+        assert_eq!(LiteralValue::String("true".to_string()), *tokens[13].literal.as_ref().unwrap());
         assert_eq!(TokenType::Var, tokens[14].r#type);
-        assert_eq!("var", tokens[14].literal.as_ref().unwrap());
+        assert_eq!(LiteralValue::String("var".to_string()), *tokens[14].literal.as_ref().unwrap());
         assert_eq!(TokenType::While, tokens[15].r#type);
-        assert_eq!("while", tokens[15].literal.as_ref().unwrap());
+        assert_eq!(LiteralValue::String("while".to_string()), *tokens[15].literal.as_ref().unwrap());
         assert_eq!(TokenType::Eof, tokens[16].r#type);
 
         Ok(())
