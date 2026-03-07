@@ -35,7 +35,7 @@ pub trait Visitor<T> {
 }
 
 impl Expr {
-    fn accept<T>(&self, visitor: &dyn Visitor<T>) -> T {
+    pub fn accept<T>(&self, visitor: &dyn Visitor<T>) -> T {
         match self {
             Expr::Binary(expr) => visitor.visit_binary(expr),
             Expr::Grouping(expr) => visitor.visit_grouping(expr),

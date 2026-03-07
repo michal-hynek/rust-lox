@@ -6,6 +6,7 @@ use crate::runner::{run_file, run_prompt};
 mod runner;
 mod scanner;
 mod ast;
+mod parser;
 
 /// Rust implementation of Lox interpreter
 #[derive(Parser, Debug)]

@@ -51,10 +51,10 @@ pub enum TokenType {
 #[derive(Debug, Display)]
 #[display("type: {}, lexeme: {}, literal: {:?}, line: {}", r#type, lexeme, literal, line)]
 pub struct Token {
-    r#type: TokenType,
-    lexeme: String,
-    literal: Option<LiteralValue>,
-    line: usize,
+    pub r#type: TokenType,
+    pub lexeme: String,
+    pub literal: Option<LiteralValue>,
+    pub line: usize,
 }
 
 #[derive(Debug, Display, PartialEq)]
