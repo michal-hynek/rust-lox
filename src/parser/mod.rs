@@ -18,4 +18,12 @@ impl Parser {
     pub fn parse(&mut self) -> Expr {
         todo!()
     }
+
+    fn expression(&mut self) {
+        self.equality();
+    }
+
+    fn equality(&mut self) {
+        todo!();
+    }
 }
