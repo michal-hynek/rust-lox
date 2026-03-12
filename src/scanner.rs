@@ -48,7 +48,7 @@ pub enum TokenType {
     Eof,
 }
 
-#[derive(Debug, Display)]
+#[derive(Debug, Display, Clone)]
 #[display("type: {}, lexeme: {}, literal: {:?}, line: {}", r#type, lexeme, literal, line)]
 pub struct Token {
     pub r#type: TokenType,
@@ -57,7 +57,7 @@ pub struct Token {
     pub line: usize,
 }
 
-#[derive(Debug, Display, PartialEq)]
+#[derive(Debug, Display, PartialEq, Clone)]
 pub enum LiteralValue {
     Number(f64),
     String(String),

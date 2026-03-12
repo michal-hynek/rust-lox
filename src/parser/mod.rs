@@ -1,4 +1,4 @@
-use crate::{ast::Expr, scanner::Token};
+use crate::{ast::{BinaryExpr, Expr}, scanner::{Token, TokenType}};
 
 mod ast_printer;
 
@@ -19,11 +19,67 @@ impl Parser {
         todo!()
     }
 
-    fn expression(&mut self) {
-        self.equality();
+    fn expression(&mut self) -> Expr {
+        self.equality()
     }
 
-    fn equality(&mut self) {
-        todo!();
+    fn equality(&mut self) -> Expr {
+        let mut expr = self.comparison();
+
+        while self.r#match(vec![TokenType::Bang, TokenType::BangEqual]) {
+            let operator = self.previous().clone();
+            let right = self.comparison();
+
+            expr = Expr::Binary(BinaryExpr{
+                left: Box::new(expr),
+                operator,
+                right: Box::new(right)
+            })
+        }
+
+        expr
+    }
+
+    fn comparison(&mut self) -> Expr {
+        todo!()
+    }
+
+    fn r#match(&mut self, token_types: Vec<TokenType>) -> bool {
+        for token_type in token_types {
+            if self.check(token_type) {
+                self.advance();
+                return true;
+            }
+        }
+
+        false
+    }
+
+    fn check(&self, token_type: TokenType) -> bool {
+        if self.is_at_end() {
+            false
+        } else {
+            self.tokens[self.current].r#type == token_type
+        }
+    }
+
+    fn advance(&mut self) -> &Token {
+        if !self.is_at_end() {
+            self.current += 1;
+        }
+
+        self.previous()
+    }
+
+    fn previous(&self) -> &Token {
+        &self.tokens[self.current-1]
+    }
+
+    fn peek(&self) -> &Token {
+        &self.tokens[self.current-1]
+    }
+
+    fn is_at_end(&self) -> bool {
+        self.peek().r#type == TokenType::Eof
     }
 }
