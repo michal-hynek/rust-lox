@@ -41,6 +41,23 @@ impl Parser {
     }
 
     fn comparison(&mut self) -> Expr {
+        let mut expr = self.term();
+
+        while self.r#match(vec![TokenType::Greater, TokenType::GreaterEqual, TokenType::Less, TokenType::LessEqual]) {
+            let operator = self.previous().clone();
+            let right = self.comparison();
+
+            expr = Expr::Binary(BinaryExpr {
+                left: Box::new(expr),
+                operator,
+                right: Box::new(right),
+            });
+        }
+
+        expr
+    }
+
+    fn term(&mut self) -> Expr {
         todo!()
     }
 
