@@ -45,7 +45,7 @@ impl Parser {
 
         while self.r#match(vec![TokenType::Greater, TokenType::GreaterEqual, TokenType::Less, TokenType::LessEqual]) {
             let operator = self.previous().clone();
-            let right = self.comparison();
+            let right = self.term();
 
             expr = Expr::Binary(BinaryExpr {
                 left: Box::new(expr),
@@ -58,6 +58,23 @@ impl Parser {
     }
 
     fn term(&mut self) -> Expr {
+        let mut expr = self.factor();
+
+        while self.r#match(vec![TokenType::Plus, TokenType::Minus]) {
+            let operator = self.previous().clone();
+            let right = self.factor();
+
+            expr = Expr::Binary(BinaryExpr {
+                left: Box::new(expr),
+                operator,
+                right: Box::new(right),
+            });
+        }
+
+        expr
+    }
+
+    fn factor(&mut self) -> Expr {
         todo!()
     }
 
