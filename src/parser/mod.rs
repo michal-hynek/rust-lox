@@ -1,4 +1,4 @@
-use crate::{ast::{BinaryExpr, Expr}, scanner::{Token, TokenType}};
+use crate::{ast::{BinaryExpr, Expr, UnaryExpr}, scanner::{Token, TokenType}};
 
 mod ast_printer;
 
@@ -92,6 +92,20 @@ impl Parser {
     }
 
     fn unary(&mut self) -> Expr {
+        if self.r#match(vec![TokenType::Bang, TokenType::Minus]) {
+            let operator = self.previous().clone();
+            let right = self.unary();
+
+            Expr::Unary(UnaryExpr {
+                operator,
+                right: Box::new(right),
+            })
+        } else {
+            self.primary()
+        }
+    }
+
+    fn primary(&mut self) -> Expr {
         todo!()
     }
 
