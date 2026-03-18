@@ -1,4 +1,6 @@
-use crate::{ast::{BinaryExpr, Expr, UnaryExpr}, scanner::{Token, TokenType}};
+use anyhow::Result;
+
+use crate::{ast::{BinaryExpr, Expr, GroupingExpr, LiteralExpr, UnaryExpr}, scanner::{LiteralValue, Token, TokenType}};
 
 mod ast_printer;
 
@@ -15,20 +17,20 @@ impl Parser {
         }
     }
 
-    pub fn parse(&mut self) -> Expr {
+    pub fn parse(&mut self) -> Result<Expr> {
         todo!()
     }
 
-    fn expression(&mut self) -> Expr {
+    fn expression(&mut self) -> Result<Expr> {
         self.equality()
     }
 
-    fn equality(&mut self) -> Expr {
-        let mut expr = self.comparison();
+    fn equality(&mut self) -> Result<Expr> {
+        let mut expr = self.comparison()?;
 
         while self.r#match(vec![TokenType::Bang, TokenType::BangEqual]) {
             let operator = self.previous().clone();
-            let right = self.comparison();
+            let right = self.comparison()?;
 
             expr = Expr::Binary(BinaryExpr{
                 left: Box::new(expr),
@@ -37,15 +39,15 @@ impl Parser {
             })
         }
 
-        expr
+        Ok(expr)
     }
 
-    fn comparison(&mut self) -> Expr {
-        let mut expr = self.term();
+    fn comparison(&mut self) -> Result<Expr> {
+        let mut expr = self.term()?;
 
         while self.r#match(vec![TokenType::Greater, TokenType::GreaterEqual, TokenType::Less, TokenType::LessEqual]) {
             let operator = self.previous().clone();
-            let right = self.term();
+            let right = self.term()?;
 
             expr = Expr::Binary(BinaryExpr {
                 left: Box::new(expr),
@@ -54,15 +56,15 @@ impl Parser {
             });
         }
 
-        expr
+        Ok(expr)
     }
 
-    fn term(&mut self) -> Expr {
-        let mut expr = self.factor();
+    fn term(&mut self) -> Result<Expr> {
+        let mut expr = self.factor()?;
 
         while self.r#match(vec![TokenType::Plus, TokenType::Minus]) {
             let operator = self.previous().clone();
-            let right = self.factor();
+            let right = self.factor()?;
 
             expr = Expr::Binary(BinaryExpr {
                 left: Box::new(expr),
@@ -71,15 +73,15 @@ impl Parser {
             });
         }
 
-        expr
+        Ok(expr)
     }
 
-    fn factor(&mut self) -> Expr {
-        let mut expr = self.unary();
+    fn factor(&mut self) -> Result<Expr> {
+        let mut expr = self.unary()?;
 
         while self.r#match(vec![TokenType::Slash, TokenType::Star]) {
             let operator = self.previous().clone();
-            let right = self.unary();
+            let right = self.unary()?;
 
             expr = Expr::Binary(BinaryExpr {
                 left: Box::new(expr),
@@ -88,25 +90,52 @@ impl Parser {
             });
         }
 
-        expr
+        Ok(expr)
     }
 
-    fn unary(&mut self) -> Expr {
+    fn unary(&mut self) -> Result<Expr> {
         if self.r#match(vec![TokenType::Bang, TokenType::Minus]) {
             let operator = self.previous().clone();
-            let right = self.unary();
+            let right = self.unary()?;
 
-            Expr::Unary(UnaryExpr {
+            Ok(Expr::Unary(UnaryExpr {
                 operator,
                 right: Box::new(right),
-            })
+            }))
         } else {
             self.primary()
         }
     }
 
-    fn primary(&mut self) -> Expr {
-        todo!()
+    fn primary(&mut self) -> Result<Expr> {
+        if self.r#match(vec![TokenType::Number, TokenType::String]) {
+            let value = self.previous().literal.as_ref().unwrap();
+            return Ok(Expr::Literal(LiteralExpr { value: value.clone() }));
+        }
+
+        if self.r#match(vec![TokenType::True]) {
+            return Ok(Expr::Literal(LiteralExpr { value: LiteralValue::True }));
+        }
+
+        if self.r#match(vec![TokenType::False]) {
+            return Ok(Expr::Literal(LiteralExpr { value: LiteralValue::False }));
+        }
+
+        if self.r#match(vec![TokenType::Nil]) {
+            return Ok(Expr::Literal(LiteralExpr { value: LiteralValue::Nil }));
+        }
+
+        if self.r#match(vec![TokenType::LeftParen]) {
+            let expr = self.expression()?;
+            self.consume(
+                TokenType::RightParen,
+                format!("Expected ')' after expression on line {}", self.peek().line)
+            )?;
+
+            return Ok(Expr::Grouping(GroupingExpr { expression: Box::new(expr) }));
+        }
+
+        Err(anyhow::anyhow!(format!("Expected expression on line {}", self.peek().line)))
     }
 
     fn r#match(&mut self, token_types: Vec<TokenType>) -> bool {
@@ -134,6 +163,14 @@ impl Parser {
         }
 
         self.previous()
+    }
+
+    fn consume(&mut self, expected_type: TokenType, error_message: String) -> Result<&Token> {
+        if self.check(expected_type) {
+            return Ok(self.advance());
+        }
+
+        Err(anyhow::anyhow!(error_message))
     }
 
     fn previous(&self) -> &Token {

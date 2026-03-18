@@ -61,6 +61,9 @@ pub struct Token {
 pub enum LiteralValue {
     Number(f64),
     String(String),
+    True,
+    False,
+    Nil,
 }
 
 pub struct Scanner {

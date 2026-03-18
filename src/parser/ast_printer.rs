@@ -35,6 +35,9 @@ impl Visitor<String> for AstPrinter {
         match &literal.value {
             LiteralValue::Number(v) => v.to_string(),
             LiteralValue::String(v) => v.clone(),
+            LiteralValue::True => "true".to_string(),
+            LiteralValue::False => "false".to_string(),
+            LiteralValue::Nil => "nil".to_string(),
         }
     }
 
