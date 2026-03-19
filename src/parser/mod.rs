@@ -2,7 +2,7 @@ use anyhow::Result;
 
 use crate::{ast::{BinaryExpr, Expr, GroupingExpr, LiteralExpr, UnaryExpr}, scanner::{LiteralValue, Token, TokenType}};
 
-mod ast_printer;
+pub mod ast_printer;
 
 pub struct Parser {
     tokens: Vec<Token>,
@@ -18,7 +18,8 @@ impl Parser {
     }
 
     pub fn parse(&mut self) -> Result<Expr> {
-        todo!()
+        let expr = self.expression()?;
+        Ok(expr)
     }
 
     fn expression(&mut self) -> Result<Expr> {
@@ -138,6 +139,24 @@ impl Parser {
         Err(anyhow::anyhow!(format!("Expected expression on line {}", self.peek().line)))
     }
 
+    fn synchronize(&mut self) {
+        self.advance();
+
+        while !self.is_at_end() {
+            if self.previous().r#type == TokenType::Semicolon {
+                return;
+            }
+
+            if [TokenType::Class, TokenType::Fun, TokenType::Var,
+                TokenType::For, TokenType::If, TokenType::While,
+                TokenType::Print, TokenType::Return].contains(&self.peek().r#type) {
+                return;
+            }
+
+            self.advance();
+        }
+    }
+
     fn r#match(&mut self, token_types: Vec<TokenType>) -> bool {
         for token_type in token_types {
             if self.check(token_type) {
@@ -178,7 +197,7 @@ impl Parser {
     }
 
     fn peek(&self) -> &Token {
-        &self.tokens[self.current-1]
+        &self.tokens[self.current]
     }
 
     fn is_at_end(&self) -> bool {

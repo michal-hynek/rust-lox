@@ -5,6 +5,12 @@ pub struct AstPrinter {
 }
 
 impl AstPrinter {
+    pub fn new(expr: Expr) -> Self{
+        Self {
+            expr,
+        }
+    }
+
     pub fn print(&self) -> String {
         self.expr.accept::<String>(self)
     }
