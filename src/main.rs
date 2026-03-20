@@ -7,6 +7,7 @@ mod runner;
 mod scanner;
 mod ast;
 mod parser;
+mod interpreter;
 
 /// Rust implementation of Lox interpreter
 #[derive(Parser, Debug)]
