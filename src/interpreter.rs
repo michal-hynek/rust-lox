@@ -1,8 +1,8 @@
-use crate::{ast::{BinaryExpr, GroupingExpr, LiteralExpr, UnaryExpr, Visitor}, scanner::LiteralValue};
+use crate::{ast::{BinaryExpr, Expr, GroupingExpr, LiteralExpr, UnaryExpr, Visitor}, scanner::LiteralValue};
 
-struct Intepreter {}
+struct Interpreter {}
 
-impl Visitor<LiteralValue> for Intepreter {
+impl Visitor<LiteralValue> for Interpreter {
     fn visit_binary(&self, binary: &BinaryExpr) -> LiteralValue {
         todo!()
     }
@@ -29,7 +29,7 @@ mod test_interpreter {
         let literal_expr = LiteralExpr {
             value: LiteralValue::String("foo".to_string()),
         };
-        let interpreter = Intepreter {};
+        let interpreter = Interpreter {};
 
         let val = interpreter.visit_literal(&literal_expr);
 
@@ -41,7 +41,7 @@ mod test_interpreter {
         let literal_expr = LiteralExpr {
             value: LiteralValue::Number(123f64),
         };
-        let interpreter = Intepreter {};
+        let interpreter = Interpreter {};
 
         let val = interpreter.visit_literal(&literal_expr);
 
@@ -53,7 +53,7 @@ mod test_interpreter {
         let literal_expr = LiteralExpr {
             value: LiteralValue::True,
         };
-        let interpreter = Intepreter {};
+        let interpreter = Interpreter {};
 
         let val = interpreter.visit_literal(&literal_expr);
 
@@ -65,7 +65,7 @@ mod test_interpreter {
         let literal_expr = LiteralExpr {
             value: LiteralValue::False,
         };
-        let interpreter = Intepreter {};
+        let interpreter = Interpreter {};
 
         let val = interpreter.visit_literal(&literal_expr);
 
@@ -77,7 +77,7 @@ mod test_interpreter {
         let literal_expr = LiteralExpr {
             value: LiteralValue::Nil,
         };
-        let interpreter = Intepreter {};
+        let interpreter = Interpreter {};
 
         let val = interpreter.visit_literal(&literal_expr);
 
