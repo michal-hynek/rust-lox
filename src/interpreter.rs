@@ -8,7 +8,7 @@ impl Visitor<LiteralValue> for Interpreter {
     }
 
     fn visit_grouping(&self, grouping: &GroupingExpr) -> LiteralValue {
-        todo!()
+        self.evaluate(&grouping.expression)
     }
 
     fn visit_literal(&self, literal: &LiteralExpr) -> LiteralValue {
@@ -17,6 +17,12 @@ impl Visitor<LiteralValue> for Interpreter {
 
     fn visit_unary(&self, unary: &UnaryExpr) -> LiteralValue {
         todo!()
+    }
+}
+
+impl Interpreter {
+    fn evaluate(&self, expr: &Expr) -> LiteralValue {
+        expr.accept(self)
     }
 }
 
@@ -82,5 +88,21 @@ mod test_interpreter {
         let val = interpreter.visit_literal(&literal_expr);
 
         assert_eq!(LiteralValue::Nil, val);
+    }
+
+    #[test]
+    fn test_visit_grouping_with_literal_expr() {
+        let grouping = GroupingExpr {
+            expression: Box::new(Expr::Literal(
+                LiteralExpr {
+                    value: LiteralValue::Number(1.2),
+                }
+            )),
+        };
+        let interpreter = Interpreter{};
+
+        let val = interpreter.visit_grouping(&grouping);
+
+        assert_eq!(LiteralValue::Number(1.2), val);
     }
 }
