@@ -16,7 +16,16 @@ impl Visitor<LiteralValue> for Interpreter {
     }
 
     fn visit_unary(&self, unary: &UnaryExpr) -> LiteralValue {
-        todo!()
+        let right = self.evaluate(&unary.right);
+
+        if let LiteralValue::Number(num) = right {
+            LiteralValue::Number(-num)
+        } else {
+            // unreachable
+            // UnaryExpr supports two operands ! and -
+            // Parser returns an error when any other operand is used, so the code below is unreachable
+            LiteralValue::Nil
+        }
     }
 }
 
@@ -28,6 +37,8 @@ impl Interpreter {
 
 #[cfg(test)]
 mod test_interpreter {
+    use crate::scanner::{Token, TokenType};
+
     use super::*;
 
     #[test]
@@ -99,10 +110,27 @@ mod test_interpreter {
                 }
             )),
         };
-        let interpreter = Interpreter{};
+        let interpreter = Interpreter {};
 
         let val = interpreter.visit_grouping(&grouping);
 
         assert_eq!(LiteralValue::Number(1.2), val);
+    }
+
+    #[test]
+    fn test_visit_unary_with_minus() {
+        let unary = UnaryExpr {
+            operator: Token { r#type: TokenType::Minus, lexeme: "-".to_string(), literal: None, line: 1 },
+            right: Box::new(
+                Expr::Literal(LiteralExpr {
+                    value: LiteralValue::Number(2.1)
+                })
+            ),
+        };
+        let interpreter = Interpreter {};
+
+        let val = interpreter.visit_unary(&unary);
+
+        assert_eq!(LiteralValue::Number(-2.1), val);
     }
 }
