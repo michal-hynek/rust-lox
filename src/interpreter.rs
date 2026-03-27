@@ -1,4 +1,4 @@
-use crate::{ast::{BinaryExpr, Expr, GroupingExpr, LiteralExpr, UnaryExpr, Visitor}, scanner::LiteralValue};
+use crate::{ast::{BinaryExpr, Expr, GroupingExpr, LiteralExpr, UnaryExpr, Visitor}, scanner::{LiteralValue, TokenType}};
 
 struct Interpreter {}
 
@@ -18,13 +18,22 @@ impl Visitor<LiteralValue> for Interpreter {
     fn visit_unary(&self, unary: &UnaryExpr) -> LiteralValue {
         let right = self.evaluate(&unary.right);
 
-        if let LiteralValue::Number(num) = right {
-            LiteralValue::Number(-num)
-        } else {
-            // unreachable
-            // UnaryExpr supports two operands ! and -
-            // Parser returns an error when any other operand is used, so the code below is unreachable
-            LiteralValue::Nil
+        match unary.operator.r#type {
+            TokenType::Minus => {
+                if let LiteralValue::Number(num) = right {
+                    LiteralValue::Number(-num)
+                } else {
+                    // unreachable - Parser returns an error when "-" is used with a non-numeric value
+                    LiteralValue::Nil
+                }
+            },
+            TokenType::Star => todo!(),
+            _ => {
+                // unreachable
+                // UnaryExpr supports two operands ! and -
+                // Parser returns an error when any other operand is used, so the code below is unreachable
+                LiteralValue::Nil
+            }
         }
     }
 }
@@ -33,6 +42,10 @@ impl Interpreter {
     fn evaluate(&self, expr: &Expr) -> LiteralValue {
         expr.accept(self)
     }
+}
+
+fn is_truthy(val: LiteralValue) -> bool {
+    val != LiteralValue::False && val != LiteralValue::Nil
 }
 
 #[cfg(test)]
