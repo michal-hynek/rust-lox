@@ -27,7 +27,13 @@ impl Visitor<LiteralValue> for Interpreter {
                     LiteralValue::Nil
                 }
             },
-            TokenType::Star => todo!(),
+            TokenType::Bang => {
+                if is_truthy(right) {
+                    LiteralValue::False
+                } else {
+                    LiteralValue::True
+                }
+            },
             _ => {
                 // unreachable
                 // UnaryExpr supports two operands ! and -
@@ -145,5 +151,90 @@ mod test_interpreter {
         let val = interpreter.visit_unary(&unary);
 
         assert_eq!(LiteralValue::Number(-2.1), val);
+    }
+
+    #[test]
+    fn test_visit_unary_with_bang_true() {
+        let unary = UnaryExpr {
+            operator: Token { r#type: TokenType::Bang, lexeme: "!".to_string(), literal: None, line: 1 },
+            right: Box::new(
+                Expr::Literal(LiteralExpr {
+                    value: LiteralValue::True
+                })
+            ),
+        };
+        let interpreter = Interpreter {};
+
+        let val = interpreter.visit_unary(&unary);
+
+        assert_eq!(LiteralValue::False, val);
+    }
+
+    #[test]
+    fn test_visit_unary_with_bang_false() {
+        let unary = UnaryExpr {
+            operator: Token { r#type: TokenType::Bang, lexeme: "!".to_string(), literal: None, line: 1 },
+            right: Box::new(
+                Expr::Literal(LiteralExpr {
+                    value: LiteralValue::False
+                })
+            ),
+        };
+        let interpreter = Interpreter {};
+
+        let val = interpreter.visit_unary(&unary);
+
+        assert_eq!(LiteralValue::True, val);
+    }
+
+    #[test]
+    fn test_visit_unary_with_bang_nil() {
+        let unary = UnaryExpr {
+            operator: Token { r#type: TokenType::Bang, lexeme: "!".to_string(), literal: None, line: 1 },
+            right: Box::new(
+                Expr::Literal(LiteralExpr {
+                    value: LiteralValue::Nil
+                })
+            ),
+        };
+        let interpreter = Interpreter {};
+
+        let val = interpreter.visit_unary(&unary);
+
+        assert_eq!(LiteralValue::True, val);
+    }
+
+    #[test]
+    fn test_visit_unary_with_bang_number() {
+        let unary = UnaryExpr {
+            operator: Token { r#type: TokenType::Bang, lexeme: "!".to_string(), literal: None, line: 1 },
+            right: Box::new(
+                Expr::Literal(LiteralExpr {
+                    value: LiteralValue::Number(1.1)
+                })
+            ),
+        };
+        let interpreter = Interpreter {};
+
+        let val = interpreter.visit_unary(&unary);
+
+        assert_eq!(LiteralValue::False, val);
+    }
+ 
+    #[test]
+    fn test_visit_unary_with_bang_string() {
+        let unary = UnaryExpr {
+            operator: Token { r#type: TokenType::Bang, lexeme: "!".to_string(), literal: None, line: 1 },
+            right: Box::new(
+                Expr::Literal(LiteralExpr {
+                    value: LiteralValue::String("foo".to_string())
+                })
+            ),
+        };
+        let interpreter = Interpreter {};
+
+        let val = interpreter.visit_unary(&unary);
+
+        assert_eq!(LiteralValue::False, val);
     }
 }
