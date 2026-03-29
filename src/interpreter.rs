@@ -4,7 +4,21 @@ struct Interpreter {}
 
 impl Visitor<LiteralValue> for Interpreter {
     fn visit_binary(&self, binary: &BinaryExpr) -> LiteralValue {
-        todo!()
+        let left = self.evaluate(&binary.left);
+        let right = self.evaluate(&binary.right);
+
+        match binary.operator.r#type {
+            TokenType::Minus => todo!(),
+            TokenType::Slash => todo!(),
+            TokenType::Star => todo!(),
+            TokenType::Greater => todo!(),
+            TokenType::GreaterEqual => todo!(),
+            TokenType::Less => todo!(),
+            TokenType::LessEqual => todo!(),
+            TokenType::BangEqual => todo!(),
+            TokenType::EqualEqual => todo!(),
+            _ => LiteralValue::Nil,
+        }
     }
 
     fn visit_grouping(&self, grouping: &GroupingExpr) -> LiteralValue {
