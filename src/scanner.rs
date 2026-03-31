@@ -66,6 +66,15 @@ pub enum LiteralValue {
     Nil,
 }
 
+impl LiteralValue {
+    pub fn as_num(&self) -> Option<f64> {
+        match self {
+            LiteralValue::Number(n) => Some(*n),
+            _ => None,
+        }
+    }
+}
+
 pub struct Scanner {
     source: String,
     current: usize,

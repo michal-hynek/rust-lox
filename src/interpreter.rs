@@ -8,7 +8,14 @@ impl Visitor<LiteralValue> for Interpreter {
         let right = self.evaluate(&binary.right);
 
         match binary.operator.r#type {
-            TokenType::Minus => todo!(),
+            TokenType::Minus => {
+                let result = left.as_num().zip(right.as_num()).map(|(x, y)| x - y);
+
+                match result {
+                    Some(result) => LiteralValue::Number(result),
+                    None => todo!(),
+                }
+            },
             TokenType::Slash => todo!(),
             TokenType::Star => todo!(),
             TokenType::Greater => todo!(),
@@ -250,5 +257,19 @@ mod test_interpreter {
         let val = interpreter.visit_unary(&unary);
 
         assert_eq!(LiteralValue::False, val);
+    }
+
+    #[test]
+    fn test_visit_binary_subtraction() {
+        let binary_expr = BinaryExpr {
+            left: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(3.0) } )),
+            operator: Token { r#type: TokenType::Minus, lexeme: "-".to_string(), literal: None, line: 1 },
+            right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(2.0) })),
+        };
+        let interpreter = Interpreter {};
+
+        let val = interpreter.visit_binary(&binary_expr);
+
+        assert_eq!(LiteralValue::Number(1.0), val);
     }
 }
