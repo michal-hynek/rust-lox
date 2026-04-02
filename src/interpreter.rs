@@ -24,7 +24,14 @@ impl Visitor<LiteralValue> for Interpreter {
                     None => todo!(),
                 }
             },
-            TokenType::Star => todo!(),
+            TokenType::Star => {
+                let result = left.as_num().zip(right.as_num()).map(|(x, y)| x * y);
+
+                match result {
+                    Some(num) => LiteralValue::Number(num),
+                    None => todo!(),
+                }
+            },
             TokenType::Greater => todo!(),
             TokenType::GreaterEqual => todo!(),
             TokenType::Less => todo!(),
@@ -292,5 +299,19 @@ mod test_interpreter {
         let val = interpreter.visit_binary(&binary_expr);
 
         assert_eq!(LiteralValue::Number(2.0), val);
+    }
+
+    #[test]
+    fn test_visit_binary_multiplication() {
+        let binary_expr = BinaryExpr {
+            left: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(5.0) } )),
+            operator: Token { r#type: TokenType::Star, lexeme: "*".to_string(), literal: None, line: 1 },
+            right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(3.0) })),
+        };
+        let interpreter = Interpreter {};
+
+        let val = interpreter.visit_binary(&binary_expr);
+
+        assert_eq!(LiteralValue::Number(15.0), val);
     }
 }
