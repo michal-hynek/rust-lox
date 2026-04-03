@@ -73,6 +73,13 @@ impl LiteralValue {
             _ => None,
         }
     }
+
+    pub fn as_string(&self) -> Option<String> {
+        match self {
+            LiteralValue::String(str) => Some(str.to_string()),
+            _ => None,
+        }
+    }
 }
 
 pub struct Scanner {

@@ -32,6 +32,18 @@ impl Visitor<LiteralValue> for Interpreter {
                     None => todo!(),
                 }
             },
+            TokenType::Plus => {
+                let (addition, concatenation) = (
+                    left.as_num().zip(right.as_num()).map(|(x, y)| x + y),
+                    left.as_string().zip(right.as_string()).map(|(x, y)| x + &y),
+                );
+
+                match (addition, concatenation) {
+                    (Some(result), None) => LiteralValue::Number(result),
+                    (None, Some(result)) => LiteralValue::String(result),
+                    _ => todo!(),
+                }
+            },
             TokenType::Greater => todo!(),
             TokenType::GreaterEqual => todo!(),
             TokenType::Less => todo!(),
@@ -313,5 +325,33 @@ mod test_interpreter {
         let val = interpreter.visit_binary(&binary_expr);
 
         assert_eq!(LiteralValue::Number(15.0), val);
+    }
+
+    #[test]
+    fn test_visit_binary_addition() {
+        let binary_expr = BinaryExpr {
+            left: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(4.0) } )),
+            operator: Token { r#type: TokenType::Plus, lexeme: "+".to_string(), literal: None, line: 1 },
+            right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(3.0) })),
+        };
+        let interpreter = Interpreter {};
+
+        let val = interpreter.visit_binary(&binary_expr);
+
+        assert_eq!(LiteralValue::Number(7.0), val);
+    }
+
+    #[test]
+    fn test_visit_binary_concatenation() {
+        let binary_expr = BinaryExpr {
+            left: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::String("Hello".to_string()) } )),
+            operator: Token { r#type: TokenType::Plus, lexeme: "+".to_string(), literal: None, line: 1 },
+            right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::String("World".to_string()) })),
+        };
+        let interpreter = Interpreter {};
+
+        let val = interpreter.visit_binary(&binary_expr);
+
+        assert_eq!(LiteralValue::String("HelloWorld".to_string()), val);
     }
 }
