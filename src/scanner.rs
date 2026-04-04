@@ -80,6 +80,14 @@ impl LiteralValue {
             _ => None,
         }
     }
+
+    pub fn from_bool(val: bool) -> Self {
+        if val {
+            LiteralValue::True
+        } else {
+            LiteralValue::False
+        }
+    }
 }
 
 pub struct Scanner {
