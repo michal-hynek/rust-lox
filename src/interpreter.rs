@@ -68,7 +68,14 @@ impl Visitor<LiteralValue> for Interpreter {
                     None => todo!(),
                 }
             },
-            TokenType::LessEqual => todo!(),
+            TokenType::LessEqual => {
+                let result = left.as_num().zip(right.as_num()).map(|(x, y)| x <= y);
+
+                match result {
+                    Some(comparison) => LiteralValue::from_bool(comparison),
+                    None => todo!(),
+                }
+            },
             TokenType::BangEqual => todo!(),
             TokenType::EqualEqual => todo!(),
             _ => LiteralValue::Nil,
@@ -500,5 +507,47 @@ mod test_interpreter {
         let val = interpreter.visit_binary(&binary_expr);
 
         assert_eq!(LiteralValue::False, val);
+    }
+
+    #[test]
+    fn test_visit_binary_less_or_equal_comparison() {
+        let binary_expr = BinaryExpr {
+            left: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(1.0) } )),
+            operator: Token { r#type: TokenType::LessEqual, lexeme: "<=".to_string(), literal: None, line: 1 },
+            right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(2.0) })),
+        };
+        let interpreter = Interpreter {};
+
+        let val = interpreter.visit_binary(&binary_expr);
+
+        assert_eq!(LiteralValue::True, val);
+    }
+
+    #[test]
+    fn test_visit_binary_less_or_equal_comparison2() {
+        let binary_expr = BinaryExpr {
+            left: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(3.0) } )),
+            operator: Token { r#type: TokenType::LessEqual, lexeme: "<=".to_string(), literal: None, line: 1 },
+            right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(2.0) })),
+        };
+        let interpreter = Interpreter {};
+
+        let val = interpreter.visit_binary(&binary_expr);
+
+        assert_eq!(LiteralValue::False, val);
+    }
+
+    #[test]
+    fn test_visit_binary_less_or_equal_comparison3() {
+        let binary_expr = BinaryExpr {
+            left: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(2.0) } )),
+            operator: Token { r#type: TokenType::LessEqual, lexeme: "<=".to_string(), literal: None, line: 1 },
+            right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(2.0) })),
+        };
+        let interpreter = Interpreter {};
+
+        let val = interpreter.visit_binary(&binary_expr);
+
+        assert_eq!(LiteralValue::True, val);
     }
 }
