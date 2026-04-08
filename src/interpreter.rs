@@ -76,7 +76,13 @@ impl Visitor<LiteralValue> for Interpreter {
                     None => todo!(),
                 }
             },
-            TokenType::BangEqual => todo!(),
+            TokenType::BangEqual => {
+                if left != right {
+                    LiteralValue::True
+                } else {
+                    LiteralValue::False
+                }
+            },
             TokenType::EqualEqual => todo!(),
             _ => LiteralValue::Nil,
         }
@@ -543,6 +549,34 @@ mod test_interpreter {
             left: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(2.0) } )),
             operator: Token { r#type: TokenType::LessEqual, lexeme: "<=".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(2.0) })),
+        };
+        let interpreter = Interpreter {};
+
+        let val = interpreter.visit_binary(&binary_expr);
+
+        assert_eq!(LiteralValue::True, val);
+    }
+
+    #[test]
+    fn test_visit_binary_not_equal_strings() {
+        let binary_expr = BinaryExpr {
+            left: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::String("hello".to_string()) } )),
+            operator: Token { r#type: TokenType::BangEqual, lexeme: "!=".to_string(), literal: None, line: 1 },
+            right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::String("hello".to_string()) })),
+        };
+        let interpreter = Interpreter {};
+
+        let val = interpreter.visit_binary(&binary_expr);
+
+        assert_eq!(LiteralValue::False, val);
+    }
+
+    #[test]
+    fn test_visit_binary_not_equal_strings2() {
+        let binary_expr = BinaryExpr {
+            left: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::String("hello".to_string()) } )),
+            operator: Token { r#type: TokenType::BangEqual, lexeme: "!=".to_string(), literal: None, line: 1 },
+            right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::String("world".to_string()) })),
         };
         let interpreter = Interpreter {};
 
