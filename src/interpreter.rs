@@ -83,7 +83,13 @@ impl Visitor<LiteralValue> for Interpreter {
                     LiteralValue::False
                 }
             },
-            TokenType::EqualEqual => todo!(),
+            TokenType::EqualEqual => {
+                if left == right {
+                    LiteralValue::True
+                } else {
+                    LiteralValue::False
+                }
+            },
             _ => LiteralValue::Nil,
         }
     }
@@ -584,4 +590,89 @@ mod test_interpreter {
 
         assert_eq!(LiteralValue::True, val);
     }
+
+    #[test]
+    fn test_visit_binary_not_equal_numbers() {
+        let binary_expr = BinaryExpr {
+            left: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(1.1) } )),
+            operator: Token { r#type: TokenType::BangEqual, lexeme: "!=".to_string(), literal: None, line: 1 },
+            right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(1.1) })),
+        };
+        let interpreter = Interpreter {};
+
+        let val = interpreter.visit_binary(&binary_expr);
+
+        assert_eq!(LiteralValue::False, val);
+    }
+
+    #[test]
+    fn test_visit_binary_not_equal_numbers2() {
+        let binary_expr = BinaryExpr {
+            left: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(1.1) } )),
+            operator: Token { r#type: TokenType::BangEqual, lexeme: "!=".to_string(), literal: None, line: 1 },
+            right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(1.2) })),
+        };
+        let interpreter = Interpreter {};
+
+        let val = interpreter.visit_binary(&binary_expr);
+
+        assert_eq!(LiteralValue::True, val);
+    }
+
+    #[test]
+    fn test_visit_binary_equal_strings() {
+        let binary_expr = BinaryExpr {
+            left: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::String("hello".to_string()) } )),
+            operator: Token { r#type: TokenType::EqualEqual, lexeme: "==".to_string(), literal: None, line: 1 },
+            right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::String("hello".to_string()) })),
+        };
+        let interpreter = Interpreter {};
+
+        let val = interpreter.visit_binary(&binary_expr);
+
+        assert_eq!(LiteralValue::True, val);
+    }
+
+    #[test]
+    fn test_visit_binary_equal_strings2() {
+        let binary_expr = BinaryExpr {
+            left: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::String("hello".to_string()) } )),
+            operator: Token { r#type: TokenType::EqualEqual, lexeme: "==".to_string(), literal: None, line: 1 },
+            right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::String("world".to_string()) })),
+        };
+        let interpreter = Interpreter {};
+
+        let val = interpreter.visit_binary(&binary_expr);
+
+        assert_eq!(LiteralValue::False, val);
+    }
+
+    #[test]
+    fn test_visit_binary_equal_numbers() {
+        let binary_expr = BinaryExpr {
+            left: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(1.1) } )),
+            operator: Token { r#type: TokenType::EqualEqual, lexeme: "==".to_string(), literal: None, line: 1 },
+            right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(1.1) })),
+        };
+        let interpreter = Interpreter {};
+
+        let val = interpreter.visit_binary(&binary_expr);
+
+        assert_eq!(LiteralValue::True, val);
+    }
+
+    #[test]
+    fn test_visit_binary_equal_numbers2() {
+        let binary_expr = BinaryExpr {
+            left: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(1.1) } )),
+            operator: Token { r#type: TokenType::EqualEqual, lexeme: "==".to_string(), literal: None, line: 1 },
+            right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(1.2) })),
+        };
+        let interpreter = Interpreter {};
+
+        let val = interpreter.visit_binary(&binary_expr);
+
+        assert_eq!(LiteralValue::False, val);
+    }
+
 }
