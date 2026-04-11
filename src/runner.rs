@@ -2,7 +2,7 @@ use std::{fs::read_to_string, io::{self, Write}};
 
 use anyhow::Result;
 
-use crate::{parser::{Parser, ast_printer::AstPrinter}, scanner::Scanner};
+use crate::{interpreter::{self, Interpreter}, parser::{Parser, ast_printer::AstPrinter}, scanner::Scanner};
 
 pub fn run_file(file_path: &str) -> Result<()> {
     let source = read_to_string(file_path)?;
@@ -31,7 +31,7 @@ pub fn run_prompt() -> Result<()> {
             },
         }
 
-        run(&input)?;
+        let _ = run(&input).inspect_err(|e| eprintln!("{e}"));
 
         input.clear();
     }
@@ -46,8 +46,8 @@ fn run(source: &str) -> Result<()> {
     let mut parser = Parser::new(tokens);
     let expr = parser.parse()?;
 
-    let ast_printer = AstPrinter::new(expr);
-    println!("{}", ast_printer.print());
+    let interpreter = Interpreter {};
+    interpreter.interpret(&expr)?;
 
     Ok(())
 }

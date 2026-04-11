@@ -1,4 +1,4 @@
-use std::{collections::HashMap, sync::LazyLock};
+use std::{collections::HashMap, fmt, sync::LazyLock};
 
 use anyhow::Result;
 use derive_more::Display;
@@ -57,7 +57,7 @@ pub struct Token {
     pub line: usize,
 }
 
-#[derive(Debug, Display, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum LiteralValue {
     Number(f64),
     String(String),
@@ -86,6 +86,18 @@ impl LiteralValue {
             LiteralValue::True
         } else {
             LiteralValue::False
+        }
+    }
+}
+
+impl fmt::Display for LiteralValue {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            LiteralValue::Number(num) => write!(f, "{}", num),
+            LiteralValue::String(s) => write!(f, "{}", s),
+            LiteralValue::True => write!(f, "true"),
+            LiteralValue::False => write!(f, "false"),
+            LiteralValue::Nil => write!(f, "nil"),
         }
     }
 }

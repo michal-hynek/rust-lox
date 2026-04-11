@@ -2,7 +2,7 @@ use anyhow::Result;
 
 use crate::{ast::{BinaryExpr, Expr, GroupingExpr, LiteralExpr, UnaryExpr, Visitor}, scanner::{LiteralValue, TokenType}};
 
-struct Interpreter {}
+pub struct Interpreter {}
 
 impl Visitor<Result<LiteralValue>> for Interpreter {
     fn visit_binary(&self, binary: &BinaryExpr) -> Result<LiteralValue> {
@@ -120,6 +120,13 @@ impl Visitor<Result<LiteralValue>> for Interpreter {
 }
 
 impl Interpreter {
+    pub fn interpret(&self, expr: &Expr) -> Result<()> {
+        let result = self.evaluate(expr)?;
+        println!("{result}");
+
+        Ok(())
+    }
+
     fn evaluate(&self, expr: &Expr) -> Result<LiteralValue> {
         expr.accept(self)
     }
