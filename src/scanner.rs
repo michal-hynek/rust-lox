@@ -94,7 +94,7 @@ impl fmt::Display for LiteralValue {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             LiteralValue::Number(num) => write!(f, "{}", num),
-            LiteralValue::String(s) => write!(f, "{}", s),
+            LiteralValue::String(s) => write!(f, "\"{}\"", s),
             LiteralValue::True => write!(f, "true"),
             LiteralValue::False => write!(f, "false"),
             LiteralValue::Nil => write!(f, "nil"),
