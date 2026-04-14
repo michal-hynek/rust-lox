@@ -27,7 +27,7 @@ pub enum Expr {
     Unary(UnaryExpr),
 }
 
-pub trait Visitor<T> {
+pub trait ExprVisitor<T> {
     fn visit_binary(&self, binary: &BinaryExpr) -> T;
     fn visit_grouping(&self, grouping: &GroupingExpr) -> T;
     fn visit_literal(&self, literal: &LiteralExpr) -> T;
@@ -35,12 +35,39 @@ pub trait Visitor<T> {
 }
 
 impl Expr {
-    pub fn accept<T>(&self, visitor: &dyn Visitor<T>) -> T {
+    pub fn accept<T>(&self, visitor: &dyn ExprVisitor<T>) -> T {
         match self {
             Expr::Binary(expr) => visitor.visit_binary(expr),
             Expr::Grouping(expr) => visitor.visit_grouping(expr),
             Expr::Literal(expr) => visitor.visit_literal(expr),
             Expr::Unary(expr) => visitor.visit_unary(expr),
+        }
+    }
+}
+
+pub struct ExpressionStmt {
+    pub expression: Expr,
+}
+
+pub struct PrintStmt {
+    pub expression: Expr,
+}
+
+pub enum Stmt {
+    Expression(ExpressionStmt),
+    Print(PrintStmt),
+}
+
+pub trait StmtVisitor<T> {
+    fn visit_expression(&self, expression: &ExpressionStmt) -> T;
+    fn visit_print(&self, print: &PrintStmt) -> T;
+}
+
+impl Stmt {
+    pub fn accept<T>(&self, visitor: &dyn StmtVisitor<T>) -> T {
+        match self {
+            Stmt::Expression(expr) => visitor.visit_expression(expr),
+            Stmt::Print(expr) => visitor.visit_print(expr),
         }
     }
 }

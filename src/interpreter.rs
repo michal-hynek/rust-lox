@@ -1,10 +1,10 @@
 use anyhow::Result;
 
-use crate::{ast::{BinaryExpr, Expr, GroupingExpr, LiteralExpr, UnaryExpr, Visitor}, scanner::{LiteralValue, TokenType}};
+use crate::{ast::{BinaryExpr, Expr, GroupingExpr, LiteralExpr, UnaryExpr, ExprVisitor}, scanner::{LiteralValue, TokenType}};
 
 pub struct Interpreter {}
 
-impl Visitor<Result<LiteralValue>> for Interpreter {
+impl ExprVisitor<Result<LiteralValue>> for Interpreter {
     fn visit_binary(&self, binary: &BinaryExpr) -> Result<LiteralValue> {
         let left = self.evaluate(&binary.left)?;
         let right = self.evaluate(&binary.right)?;

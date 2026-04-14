@@ -2,7 +2,7 @@ use std::{fs::read_to_string, io::{self, Write}};
 
 use anyhow::Result;
 
-use crate::{interpreter::{self, Interpreter}, parser::{Parser, ast_printer::AstPrinter}, scanner::Scanner};
+use crate::{interpreter::Interpreter, parser::{Parser, ast_printer::AstPrinter}, scanner::Scanner};
 
 pub fn run_file(file_path: &str) -> Result<()> {
     let source = read_to_string(file_path)?;
