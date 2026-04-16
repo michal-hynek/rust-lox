@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use crate::{ast::{BinaryExpr, Expr, GroupingExpr, LiteralExpr, UnaryExpr}, scanner::{LiteralValue, Token, TokenType}};
+use crate::{ast::{BinaryExpr, Expr, ExpressionStmt, GroupingExpr, LiteralExpr, PrintStmt, Stmt, UnaryExpr}, scanner::{LiteralValue, Token, TokenType}};
 
 pub mod ast_printer;
 
@@ -17,9 +17,32 @@ impl Parser {
         }
     }
 
-    pub fn parse(&mut self) -> Result<Expr> {
-        let expr = self.expression()?;
-        Ok(expr)
+    pub fn parse(&mut self) -> Result<Vec<Stmt>> {
+        let mut statements = Vec::new();
+
+        while !self.is_at_end() {
+            statements.push(self.statement()?);
+        }
+
+        Ok(statements)
+    }
+
+    fn statement(&mut self) -> Result<Stmt> {
+        if self.r#match(vec![TokenType::Print]) {
+            let print_stmt = self.print_statement()?;
+            Ok(Stmt::Print(print_stmt))
+        } else {
+            let expr_stmt = self.expression_statement()?;
+            Ok(Stmt::Expression(expr_stmt))
+        }
+    }
+
+    fn print_statement(&mut self) -> Result<PrintStmt> {
+        todo!()
+    }
+
+    fn expression_statement(&mut self) -> Result<ExpressionStmt> {
+        todo!()
     }
 
     fn expression(&mut self) -> Result<Expr> {
