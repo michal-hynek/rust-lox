@@ -31,8 +31,7 @@ impl Parser {
         if self.r#match(vec![TokenType::Print]) {
             Ok(self.print_statement()?)
         } else {
-            let expr_stmt = self.expression_statement()?;
-            Ok(Stmt::Expression(expr_stmt))
+            Ok(self.expression_statement()?)
         }
     }
 
@@ -44,8 +43,12 @@ impl Parser {
         Ok(Stmt::Print(print_stmt))
     }
 
-    fn expression_statement(&mut self) -> Result<ExpressionStmt> {
-        todo!()
+    fn expression_statement(&mut self) -> Result<Stmt> {
+        let expression = self.expression()?;
+        self.consume(TokenType::Semicolon, "Expected ';' after expression.".to_string())?;
+        let expr_stmt = ExpressionStmt { expression };
+
+        Ok(Stmt::Expression(expr_stmt))
     }
 
     fn expression(&mut self) -> Result<Expr> {
