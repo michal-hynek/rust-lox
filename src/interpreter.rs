@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use crate::{ast::{BinaryExpr, Expr, GroupingExpr, LiteralExpr, UnaryExpr, ExprVisitor}, scanner::{LiteralValue, TokenType}};
+use crate::{ast::{BinaryExpr, Expr, ExprVisitor, ExpressionStmt, GroupingExpr, LiteralExpr, PrintStmt, StmtVisitor, UnaryExpr}, scanner::{LiteralValue, TokenType}};
 
 pub struct Interpreter {}
 
@@ -116,6 +116,16 @@ impl ExprVisitor<Result<LiteralValue>> for Interpreter {
                 Ok(LiteralValue::Nil)
             }
         }
+    }
+}
+
+impl StmtVisitor<Result<()>> for Interpreter {
+    fn visit_expression(&self, expression: &ExpressionStmt) -> Result<()> {
+        todo!()
+    }
+
+    fn visit_print(&self, print: &PrintStmt) -> Result<()> {
+        todo!()
     }
 }
 
