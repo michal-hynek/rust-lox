@@ -120,11 +120,12 @@ impl ExprVisitor<Result<LiteralValue>> for Interpreter {
 }
 
 impl StmtVisitor<Result<()>> for Interpreter {
-    fn visit_expression(&self, expression: &ExpressionStmt) -> Result<()> {
-        todo!()
+    fn visit_expression(&self, stmt: &ExpressionStmt) -> Result<()> {
+        let _ = self.evaluate(&stmt.expression)?;
+        Ok(())
     }
 
-    fn visit_print(&self, print: &PrintStmt) -> Result<()> {
+    fn visit_print(&self, stmt: &PrintStmt) -> Result<()> {
         todo!()
     }
 }
@@ -156,7 +157,7 @@ fn is_truthy(val: LiteralValue) -> bool {
 
 #[cfg(test)]
 mod test_interpreter {
-    use crate::scanner::{Token, TokenType};
+    use crate::{scanner::{Token, TokenType}};
 
     use super::*;
 
@@ -758,6 +759,21 @@ mod test_interpreter {
         let val = interpreter.visit_binary(&binary_expr)?;
 
         assert_eq!(LiteralValue::False, val);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_visit_literal_value_expression_statement() -> Result<()> {
+        let literal_expr = LiteralExpr {
+            value: LiteralValue::String("foo".to_string()),
+        };
+        let expr_statement = ExpressionStmt {
+            expression: Expr::Literal(literal_expr)
+        };
+        let interpreter = Interpreter {};
+
+        interpreter.visit_expression(&expr_statement)?;
 
         Ok(())
     }
