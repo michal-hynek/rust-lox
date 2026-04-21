@@ -126,7 +126,9 @@ impl StmtVisitor<Result<()>> for Interpreter {
     }
 
     fn visit_print(&self, stmt: &PrintStmt) -> Result<()> {
-        todo!()
+        let val = self.evaluate(&stmt.expression)?;
+        println!("{}", val.to_string());
+        Ok(())
     }
 }
 
@@ -774,6 +776,21 @@ mod test_interpreter {
         let interpreter = Interpreter {};
 
         interpreter.visit_expression(&expr_statement)?;
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_visit_literal_value_print_statement() -> Result<()> {
+        let literal_expr = LiteralExpr {
+            value: LiteralValue::Number(123f64),
+        };
+        let expr_statement = PrintStmt {
+            expression: Expr::Literal(literal_expr)
+        };
+        let interpreter = Interpreter {};
+
+        interpreter.visit_print(&expr_statement)?;
 
         Ok(())
     }
