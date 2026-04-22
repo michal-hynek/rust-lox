@@ -44,10 +44,10 @@ fn run(source: &str) -> Result<()> {
     let tokens = scanner.scan_tokens()?;
 
     let mut parser = Parser::new(tokens);
-    let expr = parser.parse()?;
+    let statements = parser.parse()?;
 
     let interpreter = Interpreter {};
-    interpreter.interpret(&expr)?;
+    interpreter.interpret(&statements)?;
 
     Ok(())
 }
