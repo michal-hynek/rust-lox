@@ -1,4 +1,4 @@
-use crate::{ast::{BinaryExpr, Expr, GroupingExpr, LiteralExpr, UnaryExpr, ExprVisitor}, scanner::LiteralValue};
+use crate::{ast::{BinaryExpr, Expr, ExprVisitor, GroupingExpr, LiteralExpr, UnaryExpr, VarExpr}, scanner::LiteralValue};
 
 pub struct AstPrinter {
     expr: Expr,
@@ -49,6 +49,10 @@ impl ExprVisitor<String> for AstPrinter {
 
     fn visit_unary(&self, unary: &UnaryExpr) -> String {
         self.parenthesize(&unary.operator.lexeme, vec![&unary.right])
+    }
+
+    fn visit_var(&self, var: &VarExpr) -> String {
+        self.parenthesize(&format!("var {}", var.name.clone()), vec![])
     }
 }
 
