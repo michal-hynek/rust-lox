@@ -21,10 +21,14 @@ impl Parser {
         let mut statements = Vec::new();
 
         while !self.is_at_end() {
-            statements.push(self.statement()?);
+            statements.push(self.declaration()?);
         }
 
         Ok(statements)
+    }
+
+    fn declaration(&mut self) -> Result<Stmt> {
+        self.statement()
     }
 
     fn statement(&mut self) -> Result<Stmt> {
