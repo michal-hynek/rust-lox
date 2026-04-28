@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{Error, Result};
 
 use crate::{ast::{BinaryExpr, Expr, ExpressionStmt, GroupingExpr, LiteralExpr, PrintStmt, Stmt, UnaryExpr}, scanner::{LiteralValue, Token, TokenType}};
 
@@ -7,6 +7,7 @@ pub mod ast_printer;
 pub struct Parser {
     tokens: Vec<Token>,
     current: usize,
+    errors: Vec<Error>
 }
 
 impl Parser {
@@ -14,6 +15,7 @@ impl Parser {
         Self {
             tokens,
             current: 0,
+            errors: Vec::new(),
         }
     }
 
@@ -21,14 +23,38 @@ impl Parser {
         let mut statements = Vec::new();
 
         while !self.is_at_end() {
-            statements.push(self.declaration()?);
+            if let Some(stmt) = self.declaration() {
+                statements.push(stmt);
+            }
         }
 
         Ok(statements)
     }
 
-    fn declaration(&mut self) -> Result<Stmt> {
-        self.statement()
+    fn declaration(&mut self) -> Option<Stmt> {
+        if self.r#match(vec![TokenType::Var]) {
+            match self.var_declaration() {
+                Ok(stmt) => Some(stmt),
+                Err(e) => {
+                    self.errors.push(e);
+                    self.synchronize();
+                    None
+                } 
+            }
+        } else {
+            match self.statement() {
+                Ok(stmt) => Some(stmt),
+                Err(e) => {
+                    self.errors.push(e);
+                    self.synchronize();
+                    None
+                }
+            }
+        }
+    }
+
+    fn var_declaration(&mut self) -> Result<Stmt> {
+        todo!()
     }
 
     fn statement(&mut self) -> Result<Stmt> {
