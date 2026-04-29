@@ -1,6 +1,6 @@
 use anyhow::{Error, Result};
 
-use crate::{ast::{BinaryExpr, Expr, ExpressionStmt, GroupingExpr, LiteralExpr, PrintStmt, Stmt, UnaryExpr}, scanner::{LiteralValue, Token, TokenType}};
+use crate::{ast::{BinaryExpr, Expr, ExpressionStmt, GroupingExpr, LiteralExpr, PrintStmt, Stmt, UnaryExpr, VarStmt}, scanner::{LiteralValue, Token, TokenType}};
 
 pub mod ast_printer;
 
@@ -54,7 +54,16 @@ impl Parser {
     }
 
     fn var_declaration(&mut self) -> Result<Stmt> {
-        todo!()
+        let name = self.consume(TokenType::Identifier, "Expected variable name".to_string())?.clone();
+        let initializer = if self.r#match(vec![TokenType::Equal]) {
+            Some(self.expression()?)
+        } else {
+            None
+        };
+
+        self.consume(TokenType::Semicolon, "Expected ';' after variable declaration".to_string())?;
+
+        Ok(Stmt::Var(VarStmt{ name: name.clone(), initializer }))
     }
 
     fn statement(&mut self) -> Result<Stmt> {
