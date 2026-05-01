@@ -1,6 +1,6 @@
 use anyhow::{Error, Result};
 
-use crate::{ast::{BinaryExpr, Expr, ExpressionStmt, GroupingExpr, LiteralExpr, PrintStmt, Stmt, UnaryExpr, VarStmt}, scanner::{LiteralValue, Token, TokenType}};
+use crate::{ast::{BinaryExpr, Expr, ExpressionStmt, GroupingExpr, LiteralExpr, PrintStmt, Stmt, UnaryExpr, VarExpr, VarStmt}, scanner::{LiteralValue, Token, TokenType}};
 
 pub mod ast_printer;
 
@@ -202,6 +202,12 @@ impl Parser {
             )?;
 
             return Ok(Expr::Grouping(GroupingExpr { expression: Box::new(expr) }));
+        }
+
+        if self.r#match(vec![TokenType::Identifier]) {
+            return Ok(Expr::Var(VarExpr {
+                name: self.previous().clone()
+            }));
         }
 
         Err(anyhow::anyhow!(format!("Expected expression on line {}", self.peek().line)))
