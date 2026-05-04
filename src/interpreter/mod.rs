@@ -2,6 +2,8 @@ use anyhow::Result;
 
 use crate::{ast::{BinaryExpr, Expr, ExprVisitor, ExpressionStmt, GroupingExpr, LiteralExpr, PrintStmt, Stmt, StmtVisitor, UnaryExpr, VarExpr, VarStmt}, scanner::{LiteralValue, TokenType}};
 
+mod env;
+
 pub struct Interpreter {}
 
 impl ExprVisitor<Result<LiteralValue>> for Interpreter {
