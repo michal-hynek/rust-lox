@@ -4,7 +4,7 @@ use anyhow::Result;
 
 use crate::scanner::LiteralValue;
 
-struct Environment {
+pub struct Environment {
     values: HashMap<String, LiteralValue>,
 }
 

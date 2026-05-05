@@ -1,10 +1,12 @@
 use anyhow::Result;
 
-use crate::{ast::{BinaryExpr, Expr, ExprVisitor, ExpressionStmt, GroupingExpr, LiteralExpr, PrintStmt, Stmt, StmtVisitor, UnaryExpr, VarExpr, VarStmt}, scanner::{LiteralValue, TokenType}};
+use crate::{ast::{BinaryExpr, Expr, ExprVisitor, ExpressionStmt, GroupingExpr, LiteralExpr, PrintStmt, Stmt, StmtVisitor, UnaryExpr, VarExpr, VarStmt}, interpreter::env::Environment, scanner::{LiteralValue, TokenType}};
 
 mod env;
 
-pub struct Interpreter {}
+pub struct Interpreter {
+    env: Environment,
+}
 
 impl ExprVisitor<Result<LiteralValue>> for Interpreter {
     fn visit_binary(&self, binary: &BinaryExpr) -> Result<LiteralValue> {
@@ -143,6 +145,10 @@ impl StmtVisitor<Result<()>> for Interpreter {
 }
 
 impl Interpreter {
+    pub fn new() -> Self {
+        Self { env: Environment::new() }
+    }
+
     pub fn interpret(&self, stmts: &Vec<Stmt>) -> Result<()> {
         for stmt in stmts {
             self.execute(stmt)?
@@ -184,7 +190,7 @@ mod test_interpreter {
         let literal_expr = LiteralExpr {
             value: LiteralValue::String("foo".to_string()),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_literal(&literal_expr)?;
 
@@ -198,7 +204,7 @@ mod test_interpreter {
         let literal_expr = LiteralExpr {
             value: LiteralValue::Number(123f64),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_literal(&literal_expr)?;
 
@@ -212,7 +218,7 @@ mod test_interpreter {
         let literal_expr = LiteralExpr {
             value: LiteralValue::True,
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_literal(&literal_expr)?;
 
@@ -226,7 +232,7 @@ mod test_interpreter {
         let literal_expr = LiteralExpr {
             value: LiteralValue::False,
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_literal(&literal_expr)?;
 
@@ -240,7 +246,7 @@ mod test_interpreter {
         let literal_expr = LiteralExpr {
             value: LiteralValue::Nil,
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_literal(&literal_expr)?;
 
@@ -258,7 +264,7 @@ mod test_interpreter {
                 }
             )),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_grouping(&grouping)?;
 
@@ -277,7 +283,7 @@ mod test_interpreter {
                 })
             ),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_unary(&unary)?;
 
@@ -296,7 +302,7 @@ mod test_interpreter {
                 })
             ),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_unary(&unary)?;
 
@@ -315,7 +321,7 @@ mod test_interpreter {
                 })
             ),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_unary(&unary)?;
 
@@ -334,7 +340,7 @@ mod test_interpreter {
                 })
             ),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_unary(&unary)?;
 
@@ -353,7 +359,7 @@ mod test_interpreter {
                 })
             ),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_unary(&unary)?;
 
@@ -372,7 +378,7 @@ mod test_interpreter {
                 })
             ),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_unary(&unary)?;
 
@@ -388,7 +394,7 @@ mod test_interpreter {
             operator: Token { r#type: TokenType::Minus, lexeme: "-".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(2.0) })),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_binary(&binary_expr)?;
 
@@ -404,7 +410,7 @@ mod test_interpreter {
             operator: Token { r#type: TokenType::Slash, lexeme: "/".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(2.0) })),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_binary(&binary_expr)?;
 
@@ -420,7 +426,7 @@ mod test_interpreter {
             operator: Token { r#type: TokenType::Star, lexeme: "*".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(3.0) })),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_binary(&binary_expr)?;
 
@@ -436,7 +442,7 @@ mod test_interpreter {
             operator: Token { r#type: TokenType::Plus, lexeme: "+".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(3.0) })),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_binary(&binary_expr)?;
 
@@ -452,7 +458,7 @@ mod test_interpreter {
             operator: Token { r#type: TokenType::Plus, lexeme: "+".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::String("World".to_string()) })),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_binary(&binary_expr)?;
 
@@ -468,7 +474,7 @@ mod test_interpreter {
             operator: Token { r#type: TokenType::Greater, lexeme: ">".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(2.0) })),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_binary(&binary_expr)?;
 
@@ -484,7 +490,7 @@ mod test_interpreter {
             operator: Token { r#type: TokenType::Greater, lexeme: ">".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(2.0) })),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_binary(&binary_expr)?;
 
@@ -500,7 +506,7 @@ mod test_interpreter {
             operator: Token { r#type: TokenType::Greater, lexeme: ">".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(2.0) })),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_binary(&binary_expr)?;
 
@@ -516,7 +522,7 @@ mod test_interpreter {
             operator: Token { r#type: TokenType::GreaterEqual, lexeme: ">=".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(2.0) })),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_binary(&binary_expr)?;
 
@@ -532,7 +538,7 @@ mod test_interpreter {
             operator: Token { r#type: TokenType::GreaterEqual, lexeme: ">=".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(2.0) })),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_binary(&binary_expr)?;
 
@@ -548,7 +554,7 @@ mod test_interpreter {
             operator: Token { r#type: TokenType::GreaterEqual, lexeme: ">=".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(2.0) })),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_binary(&binary_expr)?;
 
@@ -564,7 +570,7 @@ mod test_interpreter {
             operator: Token { r#type: TokenType::Less, lexeme: "<".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(2.0) })),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_binary(&binary_expr)?;
 
@@ -580,7 +586,7 @@ mod test_interpreter {
             operator: Token { r#type: TokenType::Less, lexeme: "<".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(2.0) })),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_binary(&binary_expr)?;
 
@@ -596,7 +602,7 @@ mod test_interpreter {
             operator: Token { r#type: TokenType::Less, lexeme: "<".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(2.0) })),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_binary(&binary_expr)?;
 
@@ -612,7 +618,7 @@ mod test_interpreter {
             operator: Token { r#type: TokenType::LessEqual, lexeme: "<=".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(2.0) })),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_binary(&binary_expr)?;
 
@@ -628,7 +634,7 @@ mod test_interpreter {
             operator: Token { r#type: TokenType::LessEqual, lexeme: "<=".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(2.0) })),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_binary(&binary_expr)?;
 
@@ -644,7 +650,7 @@ mod test_interpreter {
             operator: Token { r#type: TokenType::LessEqual, lexeme: "<=".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(2.0) })),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_binary(&binary_expr)?;
 
@@ -660,7 +666,7 @@ mod test_interpreter {
             operator: Token { r#type: TokenType::BangEqual, lexeme: "!=".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::String("hello".to_string()) })),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_binary(&binary_expr)?;
 
@@ -676,7 +682,7 @@ mod test_interpreter {
             operator: Token { r#type: TokenType::BangEqual, lexeme: "!=".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::String("world".to_string()) })),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_binary(&binary_expr)?;
 
@@ -692,7 +698,7 @@ mod test_interpreter {
             operator: Token { r#type: TokenType::BangEqual, lexeme: "!=".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(1.1) })),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_binary(&binary_expr)?;
 
@@ -708,7 +714,7 @@ mod test_interpreter {
             operator: Token { r#type: TokenType::BangEqual, lexeme: "!=".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(1.2) })),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_binary(&binary_expr)?;
 
@@ -724,7 +730,7 @@ mod test_interpreter {
             operator: Token { r#type: TokenType::EqualEqual, lexeme: "==".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::String("hello".to_string()) })),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_binary(&binary_expr)?;
 
@@ -740,7 +746,7 @@ mod test_interpreter {
             operator: Token { r#type: TokenType::EqualEqual, lexeme: "==".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::String("world".to_string()) })),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_binary(&binary_expr)?;
 
@@ -756,7 +762,7 @@ mod test_interpreter {
             operator: Token { r#type: TokenType::EqualEqual, lexeme: "==".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(1.1) })),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_binary(&binary_expr)?;
 
@@ -772,7 +778,7 @@ mod test_interpreter {
             operator: Token { r#type: TokenType::EqualEqual, lexeme: "==".to_string(), literal: None, line: 1 },
             right: Box::new(Expr::Literal(LiteralExpr { value: LiteralValue::Number(1.2) })),
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         let val = interpreter.visit_binary(&binary_expr)?;
 
@@ -789,7 +795,7 @@ mod test_interpreter {
         let expr_statement = ExpressionStmt {
             expression: Expr::Literal(literal_expr)
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         interpreter.visit_expression(&expr_statement)?;
 
@@ -804,7 +810,7 @@ mod test_interpreter {
         let expr_statement = PrintStmt {
             expression: Expr::Literal(literal_expr)
         };
-        let interpreter = Interpreter {};
+        let interpreter = Interpreter::new();
 
         interpreter.visit_print(&expr_statement)?;
 
