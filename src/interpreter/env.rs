@@ -5,7 +5,7 @@ use anyhow::Result;
 use crate::scanner::LiteralValue;
 
 pub struct Environment {
-    values: HashMap<String, LiteralValue>,
+    values: HashMap<String, Option<LiteralValue>>,
 }
 
 impl Environment {
@@ -13,11 +13,11 @@ impl Environment {
         Environment { values: HashMap::new() }
     }
 
-    pub fn define(&mut self, name: String, value: LiteralValue) {
+    pub fn define(&mut self, name: String, value: Option<LiteralValue>) {
         self.values.insert(name, value);
     }
 
-    pub fn get(&self, name: String) -> Result<LiteralValue> {
+    pub fn get(&self, name: String) -> Result<Option<LiteralValue>> {
         match self.values.get(&name) {
             Some(val) => Ok(val.clone()),
             None => Err(anyhow::anyhow!("Undefined variable {}", name)),
