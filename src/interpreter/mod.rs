@@ -139,8 +139,15 @@ impl StmtVisitor<Result<()>> for Interpreter {
         Ok(())
     }
 
-    fn visit_var(&self, var: &VarStmt) -> Result<()> {
-        todo!()
+    fn visit_var(&mut self, var: &VarStmt) -> Result<()> {
+        let val = match &var.initializer {
+            Some(initializer) => Some(self.evaluate(initializer)?),
+            None => None,
+        };
+
+        self.env.define(var.name.lexeme.clone(), val);
+
+        Ok(())
     }
 }
 
@@ -149,7 +156,7 @@ impl Interpreter {
         Self { env: Environment::new() }
     }
 
-    pub fn interpret(&self, stmts: &Vec<Stmt>) -> Result<()> {
+    pub fn interpret(&mut self, stmts: &Vec<Stmt>) -> Result<()> {
         for stmt in stmts {
             self.execute(stmt)?
         }
@@ -157,7 +164,7 @@ impl Interpreter {
         Ok(())
     }
 
-    fn execute(&self, stmt: &Stmt) -> Result<()> {
+    fn execute(&mut self, stmt: &Stmt) -> Result<()> {
         stmt.accept(self)?;
         Ok(())
     }
