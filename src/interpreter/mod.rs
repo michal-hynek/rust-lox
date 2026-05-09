@@ -1,3 +1,5 @@
+use std::any;
+
 use anyhow::Result;
 
 use crate::{ast::{BinaryExpr, Expr, ExprVisitor, ExpressionStmt, GroupingExpr, LiteralExpr, PrintStmt, Stmt, StmtVisitor, UnaryExpr, VarExpr, VarStmt}, interpreter::env::Environment, scanner::{LiteralValue, TokenType}};
@@ -123,7 +125,12 @@ impl ExprVisitor<Result<LiteralValue>> for Interpreter {
     }
 
     fn visit_var(&self, var: &VarExpr) -> Result<LiteralValue> {
-        todo!()
+        let value = self.env.get(var.name.lexeme.to_string())?;
+
+        match value {
+            Some(value) => Ok(value),
+            None => Err(anyhow::anyhow!("Variable {} not initialized", var.name.lexeme.clone())),
+        }
     }
 }
 
