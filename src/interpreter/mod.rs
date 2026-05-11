@@ -1,5 +1,3 @@
-use std::any;
-
 use anyhow::Result;
 
 use crate::{ast::{BinaryExpr, Expr, ExprVisitor, ExpressionStmt, GroupingExpr, LiteralExpr, PrintStmt, Stmt, StmtVisitor, UnaryExpr, VarExpr, VarStmt}, interpreter::env::Environment, scanner::{LiteralValue, TokenType}};
