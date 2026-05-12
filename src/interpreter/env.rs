@@ -4,6 +4,7 @@ use anyhow::Result;
 
 use crate::scanner::LiteralValue;
 
+#[derive(Debug)]
 pub struct Environment {
     values: HashMap<String, Option<LiteralValue>>,
 }
