@@ -6,13 +6,15 @@ use crate::{interpreter::Interpreter, parser::Parser, scanner::Scanner};
 
 pub fn run_file(file_path: &str) -> Result<()> {
     let source = read_to_string(file_path)?;
-    run(&source)
+    let mut interpreter = Interpreter::new();
+    run(&source, &mut interpreter)
 }
 
 pub fn run_prompt() -> Result<()> {
     println!("Lox REPL (press CTRL-D to exit)");
 
     let mut input = String::new();
+    let mut interpreter = Interpreter::new();
 
     loop {
         print!("> ");
@@ -31,7 +33,7 @@ pub fn run_prompt() -> Result<()> {
             },
         }
 
-        let _ = run(&input).inspect_err(|e| eprintln!("{e}"));
+        let _ = run(&input, &mut interpreter).inspect_err(|e| eprintln!("{e}"));
 
         input.clear();
     }
@@ -39,14 +41,13 @@ pub fn run_prompt() -> Result<()> {
     Ok(())
 }
 
-fn run(source: &str) -> Result<()> {
+fn run(source: &str, interpreter: &mut Interpreter) -> Result<()> {
     let mut scanner = Scanner::new(source);
     let tokens = scanner.scan_tokens()?;
 
     let mut parser = Parser::new(tokens);
     let statements = parser.parse()?;
 
-    let mut interpreter = Interpreter::new();
     interpreter.interpret(&statements)?;
 
     Ok(())
