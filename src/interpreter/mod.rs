@@ -163,7 +163,7 @@ impl Interpreter {
 
     pub fn interpret(&mut self, stmts: &Vec<Stmt>) -> Result<()> {
         for stmt in stmts {
-            self.execute(stmt)?
+            self.execute(stmt)?;
         }
 
         Ok(())
